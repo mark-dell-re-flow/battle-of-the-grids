@@ -10,6 +10,12 @@
           :class="{ active: activeTab === tab.id }"
           @click="activeTab = tab.id"
         >{{ tab.label }}</button>
+        <a
+          href="https://linear.app/re-flow/issue/DASH-7428"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="linear-link"
+        >🎫 DASH-7428</a>
       </nav>
 
       <div class="settings-bar" v-if="activeTab !== 'readme'">
