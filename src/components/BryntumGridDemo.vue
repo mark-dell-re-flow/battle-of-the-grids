@@ -39,7 +39,7 @@ const props = defineProps<{ settings: Settings }>()
 
 const { data, isLoading, isError, error } = useUsersQuery()
 
-const { store } = useBryntumStore(data, props.settings)
+const { store } = useBryntumStore(data, () => props.settings)
 
 // Cast needed: Bryntum's GridColumnConfig type is overly narrow (type: 'widget' only)
 // Our columns are valid at runtime; the canonical type system can't express the full union.
@@ -52,7 +52,7 @@ function getGrid() {
   return (gridRef.value?.instance as Record<string, unknown>)?.['value'] as Record<string, unknown> | null
 }
 
-useBryntumFeatures(getGrid, props.settings)
+useBryntumFeatures(getGrid, () => props.settings)
 
 function exportCsv(): void {
   const grid = getGrid()

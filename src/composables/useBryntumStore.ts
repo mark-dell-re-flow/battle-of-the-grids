@@ -81,7 +81,7 @@ function registerMock(getData: () => User[]): void {
  * Supports pagination, sort and filter transparently — the PagingToolbar
  * works as if talking to a real server.
  */
-export function useBryntumStore(data: Ref<User[] | undefined>, settings: Settings) {
+export function useBryntumStore(data: Ref<User[] | undefined>, getSettings: () => Settings) {
   registerMock(() => data.value ?? [])
 
   const store = new AjaxStore({
@@ -96,7 +96,7 @@ export function useBryntumStore(data: Ref<User[] | undefined>, settings: Setting
 
   async function reload(): Promise<void> {
     if (!data.value) return
-    store.pageSize = settings.scrollMode === 'paginate' ? PAGE_SIZE : data.value.length
+    store.pageSize = getSettings().scrollMode === 'paginate' ? PAGE_SIZE : data.value.length
     await store.loadPage(1, {})
   }
 
@@ -104,7 +104,7 @@ export function useBryntumStore(data: Ref<User[] | undefined>, settings: Setting
   watch(data, reload, { immediate: true })
 
   // Reload when the user switches scroll mode
-  watch(() => settings.scrollMode, reload)
+  watch(() => getSettings().scrollMode, reload)
 
   return { store }
 }
