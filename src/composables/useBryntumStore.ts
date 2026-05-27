@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore — Bryntum has no bundled type declarations
-import { AjaxHelper, AjaxStore, Store, GridRowModel } from '@bryntum/grid'
+import { AjaxHelper, AjaxStore, GridRowModel } from '@bryntum/grid'
 import { watch } from 'vue'
 import { useQueryClient, type QueryClient } from '@tanstack/vue-query'
 import type { Settings } from '../types'
@@ -177,88 +177,97 @@ async function fetchTreeComments(qc: QueryClient, postId: string | number) {
   })
 }
 
+let treeMockRegistered = false
+
+function registerTreeMock(qc: QueryClient) {
+  if (treeMockRegistered) return
+  treeMockRegistered = true
+
+  AjaxHelper.mockUrl('/bryntum-tree', async (_url: string, params: Record<string, string> | undefined) => {
+    // Bryntum sends ?id=<parentId> when loading children (parentIdParamName defaults to 'id')
+    const parentId = params?.['id']
+
+    // Root request — return all users
+    if (!parentId) {
+      const users = await fetchTreeUsers(qc)
+      return {
+        responseText: JSON.stringify({
+          data: users.map((u: RawTreeUser) => ({
+            id:       `user-${u.id}`,
+            srcId:    u.id,
+            nodeType: 'user',
+            name:     `${u.firstName} ${u.lastName}`,
+            info:     u.role,
+            detail:   u.email,
+            numeric:  u.age,
+            children: true,  // Bryntum shows expand arrow & built-in loading spinner
+          })),
+        }),
+      }
+    }
+
+    // Expand a user — return their posts
+    if (parentId.startsWith('user-')) {
+      const userId = parentId.replace('user-', '')
+      const posts = await fetchTreePosts(qc, userId)
+      return {
+        responseText: JSON.stringify({
+          data: posts.length > 0
+            ? posts.map((p: RawTreePost) => ({
+                id:       `post-${p.id}`,
+                srcId:    p.id,
+                nodeType: 'post',
+                name:     p.title,
+                info:     `${p.reactions?.likes ?? 0} 👍`,
+                detail:   `${p.views} views`,
+                numeric:  p.views,
+                children: true,
+              }))
+            : [{ id: `empty-user-${userId}`, name: '— No posts', nodeType: '', info: '', detail: '', numeric: null, leaf: true }],
+        }),
+      }
+    }
+
+    // Expand a post — return its comments
+    if (parentId.startsWith('post-')) {
+      const postId = parentId.replace('post-', '')
+      const comments = await fetchTreeComments(qc, postId)
+      return {
+        responseText: JSON.stringify({
+          data: comments.length > 0
+            ? comments.map((c: RawTreeComment) => ({
+                id:       `comment-${c.id}`,
+                srcId:    c.id,
+                nodeType: 'comment',
+                name:     c.body,
+                info:     c.user?.fullName ?? '',
+                detail:   `${c.likes} 👍`,
+                numeric:  c.likes,
+                leaf:     true,
+              }))
+            : [{ id: `empty-post-${postId}`, name: '— No comments', nodeType: '', info: '', detail: '', numeric: null, leaf: true }],
+        }),
+      }
+    }
+
+    return { responseText: JSON.stringify({ data: [] }) }
+  })
+}
+
 /**
- * Creates a plain Bryntum Store in tree mode for lazy User → Post → Comment navigation.
- * Root users are fetched on load; children are fetched on expand via store events.
+ * Creates an AjaxStore in tree mode. Bryntum handles expand arrows, loading spinners,
+ * and child requests automatically — `children: true` signals a lazy-loadable parent node.
  */
 export function useBryntumTreeStore() {
   const qc = useQueryClient()
+  registerTreeMock(qc)
 
-  const store = new Store({
+  const store = new AjaxStore({
     tree:       true,
     modelClass: GridRowModel,
+    readUrl:    '/bryntum-tree',
+    autoLoad:   true,
   })
 
-  async function loadRootUsers() {
-    try {
-      const users = await fetchTreeUsers(qc)
-      const data = users.map((u: RawTreeUser) => ({
-        id:       `user-${u.id}`,
-        nodeType: 'user',
-        srcId:    u.id,
-        name:     `${u.firstName} ${u.lastName}`,
-        info:     u.role,
-        detail:   u.email,
-        numeric:  u.age,
-        // Placeholder child so Bryntum renders the expand arrow
-        children: [{ id: `placeholder-user-${u.id}`, name: '⏳ Loading…', leaf: true }],
-        expanded: false,
-      }))
-      store.data = data
-    } catch (e) {
-      console.error('[Tree] Failed to load users:', e)
-    }
-  }
-
-  // Replace placeholder children with real data on first expand
-  async function loadChildren(record: Record<string, unknown>) {
-    const id = record['id'] as string
-    const rec = record as unknown as {
-      children: unknown[];
-      appendChild: (c: unknown[]) => void;
-      replaceChildren: (c: unknown[]) => void;
-    }
-
-    // Already loaded real children — skip
-    const isPlaceholder = rec.children?.length === 1 &&
-      String((rec.children[0] as Record<string, unknown>)['id']).startsWith('placeholder-')
-    if (rec.children?.length > 0 && !isPlaceholder) return
-
-    if (id.startsWith('user-')) {
-      const userId = record['srcId'] as number
-      const posts = await fetchTreePosts(qc, userId)
-      const children = posts.length > 0
-        ? posts.map((p: RawTreePost) => ({
-            id:       `post-${p.id}`,
-            nodeType: 'post',
-            srcId:    p.id,
-            name:     p.title,
-            info:     `${p.reactions?.likes ?? 0} 👍`,
-            detail:   `${p.views} views`,
-            numeric:  p.views,
-            children: [{ id: `placeholder-post-${p.id}`, name: '⏳ Loading…', leaf: true }],
-            expanded: false,
-          }))
-        : [{ id: `empty-user-${userId}`, name: '— No posts', nodeType: '', info: '', detail: '', numeric: null, leaf: true }]
-      rec.replaceChildren(children)
-    } else if (id.startsWith('post-')) {
-      const postId = record['srcId'] as number
-      const comments = await fetchTreeComments(qc, postId)
-      const children = comments.length > 0
-        ? comments.map((c: RawTreeComment) => ({
-            id:       `comment-${c.id}`,
-            nodeType: 'comment',
-            srcId:    c.id,
-            name:     c.body,
-            info:     c.user?.fullName ?? '',
-            detail:   `${c.likes} 👍`,
-            numeric:  c.likes,
-            leaf:     true,
-          }))
-        : [{ id: `empty-post-${postId}`, name: '— No comments', nodeType: '', info: '', detail: '', numeric: null, leaf: true }]
-      rec.replaceChildren(children)
-    }
-  }
-
-  return { store, loadRootUsers, loadChildren }
+  return { store }
 }

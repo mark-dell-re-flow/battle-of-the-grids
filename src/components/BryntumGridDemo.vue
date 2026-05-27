@@ -40,7 +40,6 @@
         :columns="treeColumns"
         :stripeFeature="true"
         :treeFeature="true"
-        @toggleNode="onTreeToggleNode"
       />
     </div>
   </div>
@@ -61,14 +60,7 @@ const props = defineProps<{ settings: Settings }>()
 const { data, isLoading, isError, error } = useUsersQuery()
 
 const { store }     = useBryntumStore(() => props.settings)
-const { store: treeStore, loadRootUsers, loadChildren } = useBryntumTreeStore()
-
-// Load tree data when user switches to tree mode (deferred so the grid is mounted first)
-watch(() => props.settings.treeData, (on) => {
-  if (on) {
-    nextTick(() => loadRootUsers())
-  }
-}, { immediate: true })
+const { store: treeStore } = useBryntumTreeStore()
 
 const qc = useQueryClient()
 
@@ -180,12 +172,6 @@ useBryntumFeatures(getGrid, () => props.settings)
 
 function onSelectionChange(e: { selection: unknown[] }): void {
   selectedCount.value = e.selection?.length ?? 0
-}
-
-function onTreeToggleNode({ record, collapse }: { record: Record<string, unknown>, collapse: boolean }): void {
-  if (!collapse) {
-    loadChildren(record).catch((e: unknown) => console.error('[Tree] loadChildren error:', e))
-  }
 }
 
 watch(() => props.settings.selection, (on) => {
