@@ -19,6 +19,7 @@
         :paginationPageSizeSelector="[50, 100, 500, 1000]"
         :animateRows="false"
         @grid-ready="onGridReady"
+        @grid-size-changed="onGridSizeChanged"
       />
     </div>
   </div>
@@ -59,6 +60,11 @@ const defaultColDef = computed(() => ({
 
 function onGridReady(params) {
   gridApi.value = params.api
+  params.api.sizeColumnsToFit()
+}
+
+function onGridSizeChanged(params) {
+  params.api.sizeColumnsToFit()
 }
 
 function exportCsv() {
