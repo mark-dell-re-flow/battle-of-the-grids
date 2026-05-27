@@ -17,6 +17,7 @@
         :columnDefs="columnDefs"
         :defaultColDef="defaultColDef"
         :loading="isLoading"
+        :initialState="{ sort: { sortModel: [{ colId: 'name', sort: 'asc' }] } }"
         :pagination="settings.scrollMode === 'paginate'"
         :paginationPageSize="PAGE_SIZE"
         :paginationPageSizeSelector="[25, 50, 100]"
