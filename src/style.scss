@@ -56,6 +56,7 @@ body {
 .tabs {
   display: flex;
   gap: 0.25rem;
+  align-items: center;
 
   button {
     background: transparent;
@@ -76,6 +77,23 @@ body {
       background: rgba(255, 255, 255, 0.18);
       color: $surface;
       font-weight: 600;
+    }
+  }
+
+  .linear-link {
+    color: rgba(255, 255, 255, 0.65);
+    text-decoration: none;
+    padding: 0.4rem 1rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    transition: background 0.15s, color 0.15s;
+    margin-left: 0.5rem;
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+    padding-left: 1rem;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: $surface;
     }
   }
 }
