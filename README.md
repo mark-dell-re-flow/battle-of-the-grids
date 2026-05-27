@@ -22,6 +22,16 @@ Open http://localhost:5173 and switch between the two tabs.
 | Pagination | ✅ Built-in | ✅ Paging toolbar |
 | CSV export | ✅ Community | ✅ ExcelExporter feature |
 | Excel export | ❌ Enterprise only | ✅ Built-in (trial) |
+| Dark mode (`prefers-color-scheme`) | ✅ `ag-theme-quartz-auto-dark` | ⚠️ No built-in support — themed CSS files are static; would need manual JS to swap stylesheets at runtime |
+
+## Known limitations found during setup
+
+### AG Grid (Community)
+- **Row grouping** — `enableRowGroup` on columns and `rowGroupPanelShow` are Enterprise-only. Throws a hard error if used with Community. No graceful degradation.
+- **Excel export** — `.xlsx` export is Enterprise-only. Community supports CSV only.
+
+### Bryntum Grid (Trial)
+- **Dark mode** — None of the themed CSS files (`stockholm-light.css`, `stockholm-dark.css`, etc.) include a `prefers-color-scheme` media query. The default `grid.css` is also static. Matching OS dark/light mode requires manually swapping stylesheets via JavaScript at runtime.
 
 ## Dataset
 
