@@ -4,11 +4,10 @@
       <button @click="exportCsv">⬇ CSV</button>
       <button @click="clearFilters">✕ Clear filters</button>
       <span class="limitation" v-if="settings.grouping">⚠ Grouping: Enterprise only</span>
-      <span class="limitation" v-if="settings.scrollMode === 'paginate' && settings.grouping">·</span>
       <span class="sep" />
       <span class="row-count">{{ rowData.length.toLocaleString() }} rows</span>
     </div>
-    <div class="ag-grid-wrapper">
+    <div class="ag-grid-wrapper" :class="{ 'ag-striped': settings.striping }">
       <AgGridVue
         class="ag-theme-quartz-auto-dark"
         :rowData="rowData"
@@ -52,8 +51,8 @@ const columnDefs = [
 ]
 
 const defaultColDef = computed(() => ({
-  sortable:      true,
-  resizable:     true,
+  sortable:       true,
+  resizable:      true,
   floatingFilter: props.settings.filters,
 }))
 
@@ -69,3 +68,15 @@ function clearFilters() {
   gridApi.value?.setFilterModel(null)
 }
 </script>
+
+<style>
+/* Striping via ag-row-odd — scoped to the .ag-striped wrapper */
+.ag-striped .ag-theme-quartz-auto-dark .ag-row-odd {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+@media (prefers-color-scheme: dark) {
+  .ag-striped .ag-theme-quartz-auto-dark .ag-row-odd {
+    background-color: rgba(255, 255, 255, 0.04);
+  }
+}
+</style>

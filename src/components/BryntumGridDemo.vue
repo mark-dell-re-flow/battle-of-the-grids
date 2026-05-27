@@ -13,8 +13,11 @@
         ref="gridRef"
         :data="rowData"
         :columns="columns"
-        :features="features"
         :sortFeature="'name'"
+        :filterBarFeature="settings.filters"
+        :groupFeature="settings.grouping"
+        :stripeFeature="settings.striping"
+        :excelExporterFeature="true"
         :bbar="null"
       />
     </div>
@@ -22,7 +25,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { BryntumGrid } from '@bryntum/grid-vue-3'
 
 const props = defineProps({
@@ -44,14 +47,6 @@ const columns = [
   { field: 'yearsExperience', text: 'Exp (yrs)',   width: 110, type: 'number' },
   { field: 'age',             text: 'Age',         width: 80,  type: 'number' },
 ]
-
-const features = computed(() => ({
-  sort:          true,
-  filterBar:     props.settings.filters,
-  group:         props.settings.grouping,
-  excelExporter: true,
-  stripe:        props.settings.striping,
-}))
 
 function getGrid() {
   return gridRef.value?.instance?.value
