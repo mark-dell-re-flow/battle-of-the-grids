@@ -12,10 +12,13 @@ export interface User {
 }
 
 export interface Settings {
-  scrollMode: 'paginate' | 'virtual'
-  filters:    boolean
-  grouping:   boolean
-  striping:   boolean
+  scrollMode:  'paginate' | 'virtual'
+  filters:     boolean
+  grouping:    boolean
+  striping:    boolean
+  selection:   boolean
+  expandable:  boolean
+  customCells: boolean
 }
 
 export interface CanonicalColumn {

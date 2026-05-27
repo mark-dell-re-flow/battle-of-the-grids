@@ -1,5 +1,6 @@
 import { watch, onMounted, nextTick } from 'vue'
 import type { Settings } from '../types'
+import { toBryntumColumns, COLUMNS } from './useColumnDefs'
 
 /**
  * Drives Bryntum feature toggles imperatively.
@@ -26,9 +27,6 @@ export function useBryntumFeatures(
     const grp = features['group']
     if (grp) {
       grp.disabled = !settings.grouping
-      // Auto-group by department so the toggle has immediate visible effect.
-      // (Bryntum's group feature only adds a right-click menu — without this
-      //  the toggle appears to do nothing.)
       const store = grid['store'] as { group?: (f: string) => void; clearGroupers?: () => void }
       if (settings.grouping) store.group?.('department')
       else store.clearGroupers?.()
@@ -36,6 +34,26 @@ export function useBryntumFeatures(
 
     const stripe = features['stripe']
     if (stripe) stripe.disabled = !settings.striping
+
+    // Expandable rows — RowExpander is always configured with a renderer;
+    // toggle disabled state to show/hide the expand icons.
+    const expander = features['rowExpander']
+    if (expander) expander.disabled = !settings.expandable
+
+    // Selection — show/hide the checkbox column by toggling its hidden prop.
+    const cols = grid['columns'] as { query?: (fn: (c: Record<string,unknown>) => boolean) => Record<string,unknown>[] } | undefined
+    const checkCol = cols?.query?.((c) => c['type'] === 'check')?.[0] as Record<string, unknown> | undefined
+    if (checkCol) checkCol['hidden'] = !settings.selection
+
+    // Custom cells — update the role column renderer live.
+    const roleCol = cols?.query?.((c) => c['field'] === 'role')?.[0] as Record<string, unknown> | undefined
+    if (roleCol) {
+      const withRenderer = toBryntumColumns(COLUMNS, settings.customCells).find(c => c['field'] === 'role')
+      if (withRenderer) {
+        roleCol['renderer']   = withRenderer['renderer'] ?? null
+        roleCol['htmlEncode'] = settings.customCells ? false : true
+      }
+    }
   }
 
   onMounted(() => nextTick(applyFeatureSettings))
@@ -43,7 +61,7 @@ export function useBryntumFeatures(
   watch(
     () => {
       const s = getSettings()
-      return [s.filters, s.grouping, s.striping] as const
+      return [s.filters, s.grouping, s.striping, s.expandable, s.selection, s.customCells] as const
     },
     () => nextTick(applyFeatureSettings),
   )

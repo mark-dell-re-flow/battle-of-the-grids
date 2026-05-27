@@ -53,6 +53,33 @@
             @click="settings.striping = !settings.striping"
           >{{ settings.striping ? 'On' : 'Off' }}</button>
         </div>
+
+        <div class="setting-group">
+          <span class="setting-label">Selection</span>
+          <button
+            class="toggle-btn"
+            :class="{ active: settings.selection }"
+            @click="settings.selection = !settings.selection"
+          >{{ settings.selection ? 'On' : 'Off' }}</button>
+        </div>
+
+        <div class="setting-group">
+          <span class="setting-label">Expandable</span>
+          <button
+            class="toggle-btn"
+            :class="{ active: settings.expandable }"
+            @click="settings.expandable = !settings.expandable"
+          >{{ settings.expandable ? 'On' : 'Off' }}</button>
+        </div>
+
+        <div class="setting-group">
+          <span class="setting-label">Custom cells</span>
+          <button
+            class="toggle-btn"
+            :class="{ active: settings.customCells }"
+            @click="settings.customCells = !settings.customCells"
+          >{{ settings.customCells ? 'On' : 'Off' }}</button>
+        </div>
       </div>
     </header>
 
@@ -79,9 +106,12 @@ const tabs = [
 ]
 
 const settings = reactive<Settings>({
-  scrollMode: 'paginate',
-  filters:    true,
-  grouping:   false,
-  striping:   true,
+  scrollMode:  'paginate',
+  filters:     true,
+  grouping:    false,
+  striping:    true,
+  selection:   false,
+  expandable:  false,
+  customCells: false,
 })
 </script>

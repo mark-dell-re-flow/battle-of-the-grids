@@ -138,6 +138,11 @@ body {
 .row-count {
   font-size: 0.82rem;
   color: $text-muted;
+
+  &.selected {
+    color: #0284c7;
+    font-weight: 600;
+  }
 }
 
 .limitation {
