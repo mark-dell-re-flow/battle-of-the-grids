@@ -19,13 +19,24 @@ const ROLE_COLORS: Record<string, string> = {
   user:      '#22c55e',
 }
 
+const NODE_TYPE_COLORS: Record<string, string> = {
+  user:    '#8b5cf6',
+  post:    '#0284c7',
+  comment: '#22c55e',
+}
+
 function roleBadgeHtml(value: string): string {
   const bg = ROLE_COLORS[value] ?? '#6b7280'
   return `<span style="background:${bg};color:#fff;padding:2px 10px;border-radius:12px;font-size:0.78em;font-weight:600;letter-spacing:0.03em">${value}</span>`
 }
 
+function nodeTypeBadgeHtml(value: string): string {
+  const bg = NODE_TYPE_COLORS[value] ?? '#6b7280'
+  return `<span style="background:${bg};color:#fff;padding:2px 8px;border-radius:12px;font-size:0.75em;font-weight:600;letter-spacing:0.04em">${value}</span>`
+}
+
 /** Transform canonical columns into AG Grid columnDefs */
-export function toAgColumnDefs(cols: CanonicalColumn[], customCells = false) {
+export function toAgColumnDefs(cols: CanonicalColumn[], customCells = false, rowDrag = false) {
   return cols.map(col => ({
     field:      col.field as string,
     headerName: col.label,
@@ -35,6 +46,7 @@ export function toAgColumnDefs(cols: CanonicalColumn[], customCells = false) {
     ...(customCells && col.field === 'role'
       ? { cellRenderer: (p: { value: string }) => roleBadgeHtml(p.value) }
       : {}),
+    ...(rowDrag && col.field === 'name' ? { rowDrag: true } : {}),
   }))
 }
 
@@ -50,4 +62,21 @@ export function toBryntumColumns(cols: CanonicalColumn[], customCells = false): 
       ? { renderer: ({ value }: { value: string }) => roleBadgeHtml(value), htmlEncode: false }
       : {}),
   }))
+}
+
+/** Columns for Bryntum tree mode: User → Post → Comment */
+export function toBryntumTreeColumns(): Record<string, unknown>[] {
+  return [
+    { field: 'name',     text: 'Name',   flex: 3, tree: true },
+    {
+      field:     'nodeType',
+      text:      'Type',
+      width:     100,
+      renderer:  ({ value }: { value: string }) => nodeTypeBadgeHtml(value),
+      htmlEncode: false,
+    },
+    { field: 'info',    text: 'Info',   flex: 2 },
+    { field: 'detail',  text: 'Detail', flex: 2 },
+    { field: 'numeric', text: '#',      width: 80, type: 'number' },
+  ]
 }

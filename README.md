@@ -86,8 +86,11 @@ Open http://localhost:5173 and switch between the two tabs.
 | **Grouping** | ⚠️ Enterprise only — shows warning | Groups by Department |
 | **Striping** | `--ag-odd-row-background-color` CSS var | Stripe feature |
 | **Selection** | Reactive `rowSelection` prop; checkbox column + count badge | `selectionMode` set at init; checkbox column toggled imperatively |
-| **Expandable** | ⚠️ Enterprise only — shows warning | Native `RowExpander`; detail panel shows user info |
+| **Expandable** | ⚠️ Enterprise only — shows warning | Native `RowExpander`; lazy-fetches user's posts, todos & cart on open; cached via TanStack Query |
 | **Custom cells** | `cellRenderer` function on Role column | Column `renderer` function on Role column |
+| **Tree data** | ⚠️ Enterprise only — shows warning | AjaxStore in tree mode; User → Post → Comment; each level fetched on expand via `AjaxHelper.mockUrl` |
+| **Cell editing** | `editable: true` in `defaultColDef`; local-only edits | `cellEdit` feature toggled imperatively; column `editor` set per type |
+| **Row reorder** | `rowDragManaged` prop + `rowDrag` on Name column | `rowReorder` feature toggled imperatively |
 
 ---
 
@@ -109,22 +112,30 @@ Each grid component only contains its own template and wiring.
 
 ## When to choose each
 
-**Choose AG Grid** if:
-- You need great Vue 3 reactivity and TypeScript DX out of the box
-- Community (free/OSS) tier covers your feature needs — sort, filter, pagination, selection, cell renderers
+**Choose AG Grid Community** if:
+- You need a free/OSS grid and Community features (sort, filter, client-side pagination, selection, cell renderers) are enough
 - Large community and Stack Overflow support matters
-- You only need a data grid (no scheduling/Gantt) and can live without Enterprise features
+- You only need basic list-view display — no server-side ops, grouping, or row detail
+
+**Choose AG Grid Enterprise** if:
+- You need server-side row model, grouping, Master/Detail, or Excel export — and want AG Grid's excellent Vue 3 DX
 
 **Choose Bryntum Grid** if:
-- You need server-side operations, expandable rows, or Master/Detail — these are free in Bryntum, Enterprise-gated in AG Grid
-- You also need Scheduler, Gantt, or Calendar — one licence, one consistent API across the suite
-- Excel export out of the box matters
-- You want more built-in column types (percent, rating, etc.)
+- You need server-side operations, expandable rows, grouping, or Excel export without paying for Enterprise
+- You also need Scheduler, Gantt, or Calendar — one licence covers the whole suite
 - You're comfortable with the imperative API pattern for feature toggles
 
 ### Overall impression after hands-on comparison
 
-Bryntum required more initial wiring (imperative feature toggles, AjaxStore setup) but once in place **features worked reliably first time**. AG Grid's Vue 3 integration is smoother for simple cases — reactive props, no workarounds — but hitting anything outside the Community feature set immediately requires Enterprise. In practice, almost every advanced real-world feature (server-side data, expandable rows, grouping, Excel export) is Enterprise-only in AG Grid but included free in Bryntum.
+> **Important caveat:** this demo compares **AG Grid Community (free)** against **Bryntum Grid (paid)**. They are not the same tier. AG Grid Enterprise includes server-side row model, expandable rows, grouping, Excel export, and more — we simply couldn't test those because we don't have a licence.
+
+What we could compare fairly:
+
+- **AG Grid Community DX** is smooth for the features it includes — reactive Vue props, accurate TypeScript, straightforward `cellRenderer` functions. No surprises within its scope.
+- **Bryntum** required more initial wiring (imperative feature toggles, AjaxStore setup) but the features that are in scope — server-side pagination/sort, expandable rows, selection, custom renderers — all worked reliably once configured.
+- The **practical gap** for real-world list views is that almost every feature beyond basic display (server-side data, expandable rows, grouping, Excel export) is Enterprise-gated in AG Grid but freely included in Bryntum's single licence.
+
+If you're comparing on **cost**, AG Grid Community is MIT-free and Bryntum is paid. If you're comparing on **included features for a paid licence**, AG Grid Enterprise and Bryntum are much closer — and that's the comparison worth doing if you're serious about either.
 
 **With the November 2025 partnership**, if you're already evaluating Bryntum's scheduling products, the Grid comes with the same licence — making it a natural choice to standardise on Bryntum across the board.
 

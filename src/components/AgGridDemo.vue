@@ -4,7 +4,9 @@
       <button @click="clearFilters">✕ Clear filters</button>
       <span class="limitation" v-if="settings.grouping">⚠ Grouping: Enterprise only</span>
       <span class="limitation" v-if="settings.expandable">⚠ Expandable rows: Enterprise only</span>
+      <span class="limitation" v-if="settings.treeData">⚠ Tree data: Enterprise only</span>
       <span class="limitation">⚠ Server-side sort/filter/page: Enterprise only</span>
+      <span class="info-badge" v-if="settings.cellEditing">✏️ Edits are local only</span>
       <span class="sep" />
       <span class="row-count selected" v-if="settings.selection && selectedCount > 0">{{ selectedCount }} selected</span>
       <span class="row-count" v-if="data">{{ data.length.toLocaleString() }} rows</span>
@@ -19,6 +21,7 @@
         :columnDefs="columnDefs"
         :defaultColDef="defaultColDef"
         :rowSelection="rowSelection"
+        :rowDragManaged="settings.rowReorder"
         :loading="isLoading"
         :initialState="{ sort: { sortModel: [{ colId: 'name', sort: 'asc' }] } }"
         :pagination="settings.scrollMode === 'paginate'"
@@ -50,7 +53,9 @@ const PAGE_SIZE    = 25
 const gridApi      = shallowRef<GridApi | null>(null)
 const selectedCount = ref(0)
 
-const columnDefs = computed(() => toAgColumnDefs(COLUMNS, props.settings.customCells))
+const columnDefs = computed(() =>
+  toAgColumnDefs(COLUMNS, props.settings.customCells, props.settings.rowReorder)
+)
 
 const rowSelection = computed(() =>
   props.settings.selection
@@ -63,6 +68,7 @@ const defaultColDef = computed(() => ({
   resizable:      true,
   flex:           1,
   floatingFilter: props.settings.filters,
+  editable:       props.settings.cellEditing,
 }))
 
 const stripeStyle = computed(() =>
@@ -103,6 +109,18 @@ function clearFilters(): void {
   :deep(.ag-root-wrapper-body.ag-layout-normal) {
     height: auto;
     flex: 1 1 auto;
+  }
+}
+
+.toolbar {
+  .info-badge {
+    background: rgba(99, 102, 241, 0.15);
+    color: #a5b4fc;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.78em;
+    font-weight: 500;
   }
 }
 </style>

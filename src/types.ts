@@ -19,6 +19,9 @@ export interface Settings {
   selection:   boolean
   expandable:  boolean
   customCells: boolean
+  treeData:    boolean
+  cellEditing: boolean
+  rowReorder:  boolean
 }
 
 export interface CanonicalColumn {

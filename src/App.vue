@@ -80,6 +80,33 @@
             @click="settings.customCells = !settings.customCells"
           >{{ settings.customCells ? 'On' : 'Off' }}</button>
         </div>
+
+        <div class="setting-group">
+          <span class="setting-label">Tree data</span>
+          <button
+            class="toggle-btn"
+            :class="{ active: settings.treeData }"
+            @click="settings.treeData = !settings.treeData"
+          >{{ settings.treeData ? 'On' : 'Off' }}</button>
+        </div>
+
+        <div class="setting-group">
+          <span class="setting-label">Cell editing</span>
+          <button
+            class="toggle-btn"
+            :class="{ active: settings.cellEditing }"
+            @click="settings.cellEditing = !settings.cellEditing"
+          >{{ settings.cellEditing ? 'On' : 'Off' }}</button>
+        </div>
+
+        <div class="setting-group">
+          <span class="setting-label">Row reorder</span>
+          <button
+            class="toggle-btn"
+            :class="{ active: settings.rowReorder }"
+            @click="settings.rowReorder = !settings.rowReorder"
+          >{{ settings.rowReorder ? 'On' : 'Off' }}</button>
+        </div>
       </div>
     </header>
 
@@ -113,5 +140,8 @@ const settings = reactive<Settings>({
   selection:   true,
   expandable:  true,
   customCells: true,
+  treeData:    false,
+  cellEditing: false,
+  rowReorder:  false,
 })
 </script>

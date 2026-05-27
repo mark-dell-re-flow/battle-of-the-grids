@@ -27,7 +27,8 @@ const SORT_FIELD_MAP: Record<string, string> = {
   state:      'address.state',
 }
 
-let mockRegistered = false
+let mockRegistered     = false
+let treeMockRegistered = false
 let queryClient: QueryClient | null = null
 
 type PageResponse = { responseText: string }
@@ -128,6 +129,129 @@ export function useBryntumStore(getSettings: () => Settings) {
   }
 
   watch(() => getSettings().scrollMode, reload, { immediate: true })
+
+  return { store }
+}
+
+// ─── Tree store (User → Post → Comment, lazy-loaded on expand) ───────────────
+
+interface RawTreeUser    { id: number; firstName: string; lastName: string; age: number; email: string; role: string }
+interface RawTreePost    { id: number; title: string; views: number; reactions: { likes: number } }
+interface RawTreeComment { id: number; body: string; likes: number; user: { fullName: string } }
+
+function registerTreeMock(): void {
+  if (treeMockRegistered) return
+  treeMockRegistered = true
+
+  AjaxHelper.mockUrl('/bryntum-tree', (_url: string, params: Record<string, string>) => {
+    const qc       = queryClient!
+    const parentId = params['parentId']
+
+    // Root load — return all users with lazy children
+    if (!parentId) {
+      return qc.fetchQuery({
+        queryKey:  ['tree-users'],
+        queryFn:   async () => {
+          const res = await fetch('https://dummyjson.com/users?limit=0&select=id,firstName,lastName,age,email,role')
+          if (!res.ok) throw new Error(`dummyjson users fetch failed: ${res.status}`)
+          const { users } = await res.json() as { users: RawTreeUser[] }
+          return {
+            responseText: JSON.stringify({
+              success: true,
+              data: users.map(u => ({
+                id:       `user-${u.id}`,
+                nodeType: 'user',
+                srcId:    u.id,
+                name:     `${u.firstName} ${u.lastName}`,
+                info:     u.role,
+                detail:   u.email,
+                numeric:  u.age,
+                children: true,
+              })),
+            }),
+          }
+        },
+        staleTime: 5 * 60 * 1000,
+      })
+    }
+
+    // User children — lazy-load that user's posts
+    if (parentId.startsWith('user-')) {
+      const userId = parentId.slice(5)
+      return qc.fetchQuery({
+        queryKey:  ['tree-posts', userId],
+        queryFn:   async () => {
+          const res = await fetch(`https://dummyjson.com/users/${userId}/posts?select=id,title,views,reactions`)
+          if (!res.ok) throw new Error(`dummyjson posts fetch failed: ${res.status}`)
+          const { posts } = await res.json() as { posts: RawTreePost[] }
+          return {
+            responseText: JSON.stringify({
+              success: true,
+              data: posts.map(p => ({
+                id:       `post-${p.id}`,
+                nodeType: 'post',
+                srcId:    p.id,
+                name:     p.title,
+                info:     `${p.reactions?.likes ?? 0} 👍`,
+                detail:   `${p.views} views`,
+                numeric:  p.views,
+                children: true,
+              })),
+            }),
+          }
+        },
+        staleTime: 5 * 60 * 1000,
+      })
+    }
+
+    // Post children — lazy-load that post's comments
+    if (parentId.startsWith('post-')) {
+      const postId = parentId.slice(5)
+      return qc.fetchQuery({
+        queryKey:  ['tree-comments', postId],
+        queryFn:   async () => {
+          const res = await fetch(`https://dummyjson.com/posts/${postId}/comments?limit=20`)
+          if (!res.ok) throw new Error(`dummyjson comments fetch failed: ${res.status}`)
+          const { comments } = await res.json() as { comments: RawTreeComment[] }
+          return {
+            responseText: JSON.stringify({
+              success: true,
+              data: comments.map(c => ({
+                id:       `comment-${c.id}`,
+                nodeType: 'comment',
+                srcId:    c.id,
+                name:     c.body,
+                info:     c.user?.fullName ?? '',
+                detail:   `${c.likes} 👍`,
+                numeric:  c.likes,
+                // no children — leaf node
+              })),
+            }),
+          }
+        },
+        staleTime: 5 * 60 * 1000,
+      })
+    }
+
+    return Promise.resolve({ responseText: JSON.stringify({ success: true, data: [] }) })
+  })
+}
+
+/**
+ * Creates an AjaxStore in tree mode for lazy User → Post → Comment navigation.
+ * Each node level is fetched on demand and cached via TanStack Query.
+ * Must be called inside a Vue component setup() that already has a QueryClient.
+ */
+export function useBryntumTreeStore() {
+  queryClient = useQueryClient()
+  registerTreeMock()
+
+  const store = new AjaxStore({
+    tree:       true,
+    modelClass: GridRowModel,
+    readUrl:    '/bryntum-tree',
+    autoLoad:   true,
+  })
 
   return { store }
 }

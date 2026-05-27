@@ -41,7 +41,9 @@ export function useBryntumFeatures(
     if (expander) expander.disabled = !settings.expandable
 
     // Selection — show/hide the checkbox column by toggling its hidden prop.
-    const cols = grid['columns'] as { query?: (fn: (c: Record<string,unknown>) => boolean) => Record<string,unknown>[] } | undefined
+    const cols = grid['columns'] as {
+      query?: (fn: (c: Record<string,unknown>) => boolean) => Record<string,unknown>[]
+    } | undefined
     const checkCol = cols?.query?.((c) => c['type'] === 'check')?.[0] as Record<string, unknown> | undefined
     if (checkCol) checkCol['hidden'] = !settings.selection
 
@@ -54,6 +56,23 @@ export function useBryntumFeatures(
         roleCol['htmlEncode'] = settings.customCells ? false : true
       }
     }
+
+    // Cell editing — toggle cellEdit feature and set/clear column editors.
+    const cellEdit = features['cellEdit']
+    if (cellEdit) {
+      cellEdit.disabled = !settings.cellEditing
+      const allCols = cols?.query?.(() => true) ?? []
+      allCols.forEach((col: Record<string,unknown>) => {
+        if (col['field'] === 'id') return
+        col['editor'] = settings.cellEditing
+          ? (col['type'] === 'number' ? 'numberfield' : 'textfield')
+          : null
+      })
+    }
+
+    // Row reorder — toggle rowReorder feature disabled state.
+    const rowReorder = features['rowReorder']
+    if (rowReorder) rowReorder.disabled = !settings.rowReorder
   }
 
   onMounted(() => nextTick(applyFeatureSettings))
@@ -61,7 +80,10 @@ export function useBryntumFeatures(
   watch(
     () => {
       const s = getSettings()
-      return [s.filters, s.grouping, s.striping, s.expandable, s.selection, s.customCells] as const
+      return [
+        s.filters, s.grouping, s.striping, s.expandable,
+        s.selection, s.customCells, s.cellEditing, s.rowReorder,
+      ] as const
     },
     () => nextTick(applyFeatureSettings),
   )
