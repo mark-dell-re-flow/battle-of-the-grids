@@ -15,9 +15,9 @@
         :data="rowData"
         :columns="columns"
         :sortFeature="'name'"
-        :filterBarFeature="settings.filters ? { disabled: false } : { disabled: true }"
-        :groupFeature="settings.grouping ? { disabled: false } : { disabled: true }"
-        :stripeFeature="settings.striping ? { disabled: false } : { disabled: true }"
+        :filterBarFeature="true"
+        :groupFeature="true"
+        :stripeFeature="true"
         :excelExporterFeature="true"
         :bbar="null"
       />
@@ -26,7 +26,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { BryntumGrid } from '@bryntum/grid-vue-3'
 
 const props = defineProps({
@@ -58,6 +58,33 @@ const columns = computed(() =>
 function getGrid() {
   return gridRef.value?.instance?.value
 }
+
+function applyFeatureSettings() {
+  const grid = getGrid()
+  if (!grid) return
+
+  // FilterBar: hide/show the filter row (disabled only grays it out, not hides it)
+  const fb = grid.features.filterBar
+  if (fb) {
+    if (props.settings.filters) fb.show()
+    else fb.hide()
+  }
+
+  // Group: enable/disable right-click grouping
+  const grp = grid.features.group
+  if (grp) grp.disabled = !props.settings.grouping
+
+  // Stripe: enable/disable alternating row colours
+  const stripe = grid.features.stripe
+  if (stripe) stripe.disabled = !props.settings.striping
+}
+
+onMounted(() => nextTick(applyFeatureSettings))
+
+watch(
+  () => [props.settings.filters, props.settings.grouping, props.settings.striping],
+  () => nextTick(applyFeatureSettings),
+)
 
 function exportCsv() {
   getGrid()?.features.excelExporter.export({ exporterType: 'csv', fileName: 'bryntum-export.csv' })
