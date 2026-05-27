@@ -2,6 +2,8 @@
 
 Side-by-side comparison of **AG Grid** and **Bryntum Grid** — loaded with real data from [dummyjson.com](https://dummyjson.com), built with Vue 3 + TypeScript + TanStack Query.
 
+🔗 **Live demo:** https://mark-dell-re-flow.github.io/battle-of-the-grids/
+
 ## Getting started
 
 ```bash
