@@ -15,9 +15,6 @@
         :pagination="true"
         :paginationPageSize="100"
         :paginationPageSizeSelector="[50, 100, 500, 1000]"
-        :rowGroupPanelShow="'always'"
-        :groupDefaultExpanded="0"
-        :suppressRowGroupHidesColumns="true"
         :animateRows="false"
         @grid-ready="onGridReady"
       />
@@ -37,14 +34,14 @@ defineProps({ rowData: { type: Array, required: true } })
 const gridApi = shallowRef(null)
 
 const columnDefs = [
-  { field: 'id',              headerName: 'ID',          width: 80,  filter: 'agNumberColumnFilter', enableRowGroup: false },
+  { field: 'id',              headerName: 'ID',          width: 80,  filter: 'agNumberColumnFilter' },
   { field: 'name',            headerName: 'Name',        width: 180, filter: 'agTextColumnFilter' },
-  { field: 'department',      headerName: 'Department',  width: 140, filter: 'agTextColumnFilter',   enableRowGroup: true },
-  { field: 'country',         headerName: 'Country',     width: 160, filter: 'agTextColumnFilter',   enableRowGroup: true },
+  { field: 'department',      headerName: 'Department',  width: 140, filter: 'agTextColumnFilter' },
+  { field: 'country',         headerName: 'Country',     width: 160, filter: 'agTextColumnFilter' },
   { field: 'salary',          headerName: 'Salary',      width: 130, filter: 'agNumberColumnFilter', valueFormatter: p => p.value != null ? `$${p.value.toLocaleString()}` : '' },
   { field: 'startDate',       headerName: 'Start Date',  width: 130, filter: 'agDateColumnFilter' },
-  { field: 'performance',     headerName: 'Performance', width: 180, filter: 'agTextColumnFilter',   enableRowGroup: true },
-  { field: 'status',          headerName: 'Status',      width: 120, filter: 'agTextColumnFilter',   enableRowGroup: true },
+  { field: 'performance',     headerName: 'Performance', width: 180, filter: 'agTextColumnFilter' },
+  { field: 'status',          headerName: 'Status',      width: 120, filter: 'agTextColumnFilter' },
   { field: 'yearsExperience', headerName: 'Exp (yrs)',   width: 110, filter: 'agNumberColumnFilter' },
   { field: 'age',             headerName: 'Age',         width: 80,  filter: 'agNumberColumnFilter' },
 ]

@@ -17,7 +17,7 @@ Open http://localhost:5173 and switch between the two tabs.
 |---|---|---|
 | Sorting | ✅ Multi-column | ✅ Multi-column |
 | Filtering | ✅ Floating filters per column | ✅ Filter bar |
-| Row grouping | ✅ Drag-to-group panel | ✅ Right-click / group feature |
+| Row grouping | ❌ Enterprise only | ✅ Right-click / group feature |
 | Virtualisation | ✅ (built-in) | ✅ (built-in) |
 | Pagination | ✅ Built-in | ✅ Paging toolbar |
 | CSV export | ✅ Community | ✅ ExcelExporter feature |
