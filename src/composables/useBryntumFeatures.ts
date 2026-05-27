@@ -24,7 +24,15 @@ export function useBryntumFeatures(
     if (fb) settings.filters ? fb.show?.() : fb.hide?.()
 
     const grp = features['group']
-    if (grp) grp.disabled = !settings.grouping
+    if (grp) {
+      grp.disabled = !settings.grouping
+      // Auto-group by department so the toggle has immediate visible effect.
+      // (Bryntum's group feature only adds a right-click menu — without this
+      //  the toggle appears to do nothing.)
+      const store = grid['store'] as { group?: (f: string) => void; clearGroupers?: () => void }
+      if (settings.grouping) store.group?.('department')
+      else store.clearGroupers?.()
+    }
 
     const stripe = features['stripe']
     if (stripe) stripe.disabled = !settings.striping
