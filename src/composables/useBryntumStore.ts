@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore — Bryntum has no bundled type declarations
-import { AjaxHelper, AjaxStore, GridRowModel } from '@bryntum/grid'
+import { AjaxHelper, AjaxStore, Store, GridRowModel } from '@bryntum/grid'
 import { watch } from 'vue'
 import { useQueryClient, type QueryClient } from '@tanstack/vue-query'
 import type { Settings } from '../types'
@@ -27,8 +27,7 @@ const SORT_FIELD_MAP: Record<string, string> = {
   state:      'address.state',
 }
 
-let mockRegistered     = false
-let treeMockRegistered = false
+let mockRegistered = false
 let queryClient: QueryClient | null = null
 
 type PageResponse = { responseText: string }
@@ -139,119 +138,127 @@ interface RawTreeUser    { id: number; firstName: string; lastName: string; age:
 interface RawTreePost    { id: number; title: string; views: number; reactions: { likes: number } }
 interface RawTreeComment { id: number; body: string; likes: number; user: { fullName: string } }
 
-function registerTreeMock(): void {
-  if (treeMockRegistered) return
-  treeMockRegistered = true
+async function fetchTreeUsers(qc: QueryClient) {
+  return qc.fetchQuery({
+    queryKey:  ['tree-users'],
+    queryFn:   async () => {
+      const res = await fetch('https://dummyjson.com/users?limit=0&select=id,firstName,lastName,age,email,role')
+      if (!res.ok) throw new Error(`dummyjson users fetch failed: ${res.status}`)
+      const { users } = await res.json() as { users: RawTreeUser[] }
+      return users
+    },
+    staleTime: 5 * 60 * 1000,
+  })
+}
 
-  AjaxHelper.mockUrl('/bryntum-tree', (_url: string, params: Record<string, string>) => {
-    const qc       = queryClient!
-    const parentId = params['parentId']
+async function fetchTreePosts(qc: QueryClient, userId: string | number) {
+  return qc.fetchQuery({
+    queryKey:  ['tree-posts', String(userId)],
+    queryFn:   async () => {
+      const res = await fetch(`https://dummyjson.com/users/${userId}/posts?select=id,title,views,reactions`)
+      if (!res.ok) throw new Error(`dummyjson posts fetch failed: ${res.status}`)
+      const { posts } = await res.json() as { posts: RawTreePost[] }
+      return posts
+    },
+    staleTime: 5 * 60 * 1000,
+  })
+}
 
-    // Root load — return all users with lazy children
-    if (!parentId) {
-      return qc.fetchQuery({
-        queryKey:  ['tree-users'],
-        queryFn:   async () => {
-          const res = await fetch('https://dummyjson.com/users?limit=0&select=id,firstName,lastName,age,email,role')
-          if (!res.ok) throw new Error(`dummyjson users fetch failed: ${res.status}`)
-          const { users } = await res.json() as { users: RawTreeUser[] }
-          return {
-            responseText: JSON.stringify({
-              success: true,
-              data: users.map(u => ({
-                id:       `user-${u.id}`,
-                nodeType: 'user',
-                srcId:    u.id,
-                name:     `${u.firstName} ${u.lastName}`,
-                info:     u.role,
-                detail:   u.email,
-                numeric:  u.age,
-                children: true,
-              })),
-            }),
-          }
-        },
-        staleTime: 5 * 60 * 1000,
-      })
-    }
-
-    // User children — lazy-load that user's posts
-    if (parentId.startsWith('user-')) {
-      const userId = parentId.slice(5)
-      return qc.fetchQuery({
-        queryKey:  ['tree-posts', userId],
-        queryFn:   async () => {
-          const res = await fetch(`https://dummyjson.com/users/${userId}/posts?select=id,title,views,reactions`)
-          if (!res.ok) throw new Error(`dummyjson posts fetch failed: ${res.status}`)
-          const { posts } = await res.json() as { posts: RawTreePost[] }
-          return {
-            responseText: JSON.stringify({
-              success: true,
-              data: posts.map(p => ({
-                id:       `post-${p.id}`,
-                nodeType: 'post',
-                srcId:    p.id,
-                name:     p.title,
-                info:     `${p.reactions?.likes ?? 0} 👍`,
-                detail:   `${p.views} views`,
-                numeric:  p.views,
-                children: true,
-              })),
-            }),
-          }
-        },
-        staleTime: 5 * 60 * 1000,
-      })
-    }
-
-    // Post children — lazy-load that post's comments
-    if (parentId.startsWith('post-')) {
-      const postId = parentId.slice(5)
-      return qc.fetchQuery({
-        queryKey:  ['tree-comments', postId],
-        queryFn:   async () => {
-          const res = await fetch(`https://dummyjson.com/posts/${postId}/comments?limit=20`)
-          if (!res.ok) throw new Error(`dummyjson comments fetch failed: ${res.status}`)
-          const { comments } = await res.json() as { comments: RawTreeComment[] }
-          return {
-            responseText: JSON.stringify({
-              success: true,
-              data: comments.map(c => ({
-                id:       `comment-${c.id}`,
-                nodeType: 'comment',
-                srcId:    c.id,
-                name:     c.body,
-                info:     c.user?.fullName ?? '',
-                detail:   `${c.likes} 👍`,
-                numeric:  c.likes,
-                // no children — leaf node
-              })),
-            }),
-          }
-        },
-        staleTime: 5 * 60 * 1000,
-      })
-    }
-
-    return Promise.resolve({ responseText: JSON.stringify({ success: true, data: [] }) })
+async function fetchTreeComments(qc: QueryClient, postId: string | number) {
+  return qc.fetchQuery({
+    queryKey:  ['tree-comments', String(postId)],
+    queryFn:   async () => {
+      const res = await fetch(`https://dummyjson.com/posts/${postId}/comments?limit=20`)
+      if (!res.ok) throw new Error(`dummyjson comments fetch failed: ${res.status}`)
+      const { comments } = await res.json() as { comments: RawTreeComment[] }
+      return comments
+    },
+    staleTime: 5 * 60 * 1000,
   })
 }
 
 /**
- * Creates an AjaxStore in tree mode for lazy User → Post → Comment navigation.
- * Each node level is fetched on demand and cached via TanStack Query.
- * Must be called inside a Vue component setup() that already has a QueryClient.
+ * Creates a plain Bryntum Store in tree mode for lazy User → Post → Comment navigation.
+ * Root users are fetched on load; children are fetched on expand via store events.
  */
 export function useBryntumTreeStore() {
-  queryClient = useQueryClient()
-  registerTreeMock()
+  const qc = useQueryClient()
 
-  const store = new AjaxStore({
+  const store = new Store({
     tree:       true,
     modelClass: GridRowModel,
-    readUrl:    '/bryntum-tree',
-    autoLoad:   true,
   })
 
-  return { store }
+  async function loadRootUsers() {
+    try {
+      const users = await fetchTreeUsers(qc)
+      const data = users.map((u: RawTreeUser) => ({
+        id:       `user-${u.id}`,
+        nodeType: 'user',
+        srcId:    u.id,
+        name:     `${u.firstName} ${u.lastName}`,
+        info:     u.role,
+        detail:   u.email,
+        numeric:  u.age,
+        // Placeholder child so Bryntum renders the expand arrow
+        children: [{ id: `placeholder-user-${u.id}`, name: '⏳ Loading…', leaf: true }],
+        expanded: false,
+      }))
+      store.data = data
+    } catch (e) {
+      console.error('[Tree] Failed to load users:', e)
+    }
+  }
+
+  // Replace placeholder children with real data on first expand
+  async function loadChildren(record: Record<string, unknown>) {
+    const id = record['id'] as string
+    const rec = record as unknown as {
+      children: unknown[];
+      appendChild: (c: unknown[]) => void;
+      replaceChildren: (c: unknown[]) => void;
+    }
+
+    // Already loaded real children — skip
+    const isPlaceholder = rec.children?.length === 1 &&
+      String((rec.children[0] as Record<string, unknown>)['id']).startsWith('placeholder-')
+    if (rec.children?.length > 0 && !isPlaceholder) return
+
+    if (id.startsWith('user-')) {
+      const userId = record['srcId'] as number
+      const posts = await fetchTreePosts(qc, userId)
+      const children = posts.length > 0
+        ? posts.map((p: RawTreePost) => ({
+            id:       `post-${p.id}`,
+            nodeType: 'post',
+            srcId:    p.id,
+            name:     p.title,
+            info:     `${p.reactions?.likes ?? 0} 👍`,
+            detail:   `${p.views} views`,
+            numeric:  p.views,
+            children: [{ id: `placeholder-post-${p.id}`, name: '⏳ Loading…', leaf: true }],
+            expanded: false,
+          }))
+        : [{ id: `empty-user-${userId}`, name: '— No posts', nodeType: '', info: '', detail: '', numeric: null, leaf: true }]
+      rec.replaceChildren(children)
+    } else if (id.startsWith('post-')) {
+      const postId = record['srcId'] as number
+      const comments = await fetchTreeComments(qc, postId)
+      const children = comments.length > 0
+        ? comments.map((c: RawTreeComment) => ({
+            id:       `comment-${c.id}`,
+            nodeType: 'comment',
+            srcId:    c.id,
+            name:     c.body,
+            info:     c.user?.fullName ?? '',
+            detail:   `${c.likes} 👍`,
+            numeric:  c.likes,
+            leaf:     true,
+          }))
+        : [{ id: `empty-post-${postId}`, name: '— No comments', nodeType: '', info: '', detail: '', numeric: null, leaf: true }]
+      rec.replaceChildren(children)
+    }
+  }
+
+  return { store, loadRootUsers, loadChildren }
 }
