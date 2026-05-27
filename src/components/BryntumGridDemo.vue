@@ -14,6 +14,7 @@
         :columns="columns"
         :features="features"
         :sortFeature="'name'"
+        :bbar="null"
       />
     </div>
   </div>
