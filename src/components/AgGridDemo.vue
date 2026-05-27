@@ -8,7 +8,7 @@
     </div>
     <div class="ag-grid-wrapper">
       <AgGridVue
-        class="ag-theme-quartz"
+        class="ag-theme-quartz-auto-dark"
         :rowData="rowData"
         :columnDefs="columnDefs"
         :defaultColDef="defaultColDef"
