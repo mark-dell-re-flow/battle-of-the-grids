@@ -7,6 +7,7 @@
       <span class="limitation" v-if="settings.scrollMode === 'paginate'">⚠ Pagination: server-side stores only</span>
       <span class="sep" />
       <span class="row-count">{{ rowData.length.toLocaleString() }} rows</span>
+      <a class="docs-link" href="https://bryntum.com/products/grid/docs/" target="_blank" rel="noopener">📖 Docs ↗</a>
     </div>
     <div class="b-grid-wrapper">
       <BryntumGrid

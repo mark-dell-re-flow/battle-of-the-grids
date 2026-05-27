@@ -6,6 +6,7 @@
       <span class="limitation" v-if="settings.grouping">⚠ Grouping: Enterprise only</span>
       <span class="sep" />
       <span class="row-count">{{ rowData.length.toLocaleString() }} rows</span>
+      <a class="docs-link" href="https://www.ag-grid.com/vue-data-grid/" target="_blank" rel="noopener">📖 Docs ↗</a>
     </div>
     <div class="ag-grid-wrapper" :class="{ 'ag-striped': settings.striping }">
       <AgGridVue
