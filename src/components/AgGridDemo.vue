@@ -2,6 +2,7 @@
   <div class="grid-wrapper">
     <div class="toolbar">
       <button @click="exportCsv">⬇ CSV</button>
+      <button class="btn-disabled" title="Excel export requires AG Grid Enterprise">⬇ Excel (Enterprise only)</button>
       <button @click="clearFilters">✕ Clear filters</button>
       <span class="limitation" v-if="settings.grouping">⚠ Grouping: Enterprise only</span>
       <span class="sep" />

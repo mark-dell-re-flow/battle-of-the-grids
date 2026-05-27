@@ -91,6 +91,12 @@ body {
 
 .toolbar button:hover { background: #f0f0f0; }
 
+.toolbar .btn-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .toolbar .sep { flex: 1; }
 
 .row-count {
@@ -201,3 +207,25 @@ body {
   background: #f0f0f0;
   color: #222;
 }
+
+/* Feature footer */
+.feature-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.6rem;
+  padding: 0.5rem 1rem;
+  background: #f8f8f8;
+  border-top: 1px solid #e0e0e0;
+  font-size: 0.78rem;
+}
+
+.feat {
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.feat em { font-style: normal; opacity: 0.7; }
+
+.feat-yes  { background: rgba(16,185,129,0.1);  border: 1px solid rgba(16,185,129,0.3); }
+.feat-no   { background: rgba(239,68,68,0.08);  border: 1px solid rgba(239,68,68,0.25); }
+.feat-warn { background: rgba(245,158,11,0.1);  border: 1px solid rgba(245,158,11,0.3); }

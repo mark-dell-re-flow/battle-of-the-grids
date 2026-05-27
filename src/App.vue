@@ -66,6 +66,29 @@
         :settings="settings"
       />
     </main>
+
+    <footer class="feature-footer">
+      <template v-if="activeTab === 'ag'">
+        <span class="feat feat-yes">✅ CSV export</span>
+        <span class="feat feat-no">❌ Excel export <em>(Enterprise)</em></span>
+        <span class="feat feat-no">❌ Row grouping <em>(Enterprise)</em></span>
+        <span class="feat feat-no">❌ Tree data <em>(Enterprise)</em></span>
+        <span class="feat feat-no">❌ Pivoting <em>(Enterprise)</em></span>
+        <span class="feat feat-yes">✅ Open source (Community)</span>
+        <span class="feat feat-yes">✅ Native Vue 3 reactivity</span>
+        <span class="feat feat-yes">✅ Excellent TypeScript</span>
+      </template>
+      <template v-else>
+        <span class="feat feat-yes">✅ CSV + Excel export</span>
+        <span class="feat feat-yes">✅ Row grouping</span>
+        <span class="feat feat-yes">✅ Tree data</span>
+        <span class="feat feat-no">❌ Pivoting</span>
+        <span class="feat feat-yes">✅ Rich column types</span>
+        <span class="feat feat-yes">✅ Scheduler / Gantt / Calendar suite</span>
+        <span class="feat feat-warn">⚠️ Imperative feature toggles</span>
+        <span class="feat feat-warn">⚠️ Pagination needs AjaxStore</span>
+      </template>
+    </footer>
   </div>
 </template>
 
