@@ -104,7 +104,7 @@ body {
 }
 
 /* AG Grid fills its container */
-.ag-grid-wrapper .ag-theme-quartz {
+.ag-grid-wrapper [class^="ag-theme-"] {
   height: 100%;
   width: 100%;
 }
