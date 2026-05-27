@@ -4,6 +4,7 @@
       <button @click="exportCsv">⬇ CSV</button>
       <button @click="exportExcel">⬇ Excel</button>
       <button @click="clearFilters">✕ Clear filters</button>
+      <span class="limitation" v-if="settings.scrollMode === 'paginate'">⚠ Pagination: server-side stores only</span>
       <span class="sep" />
       <span class="row-count">{{ rowData.length.toLocaleString() }} rows</span>
     </div>
@@ -21,10 +22,13 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { BryntumGrid } from '@bryntum/grid-vue-3'
 
-defineProps({ rowData: { type: Array, required: true } })
+const props = defineProps({
+  rowData:  { type: Array,  required: true },
+  settings: { type: Object, required: true },
+})
 
 const gridRef = ref(null)
 
@@ -41,13 +45,13 @@ const columns = [
   { field: 'age',             text: 'Age',         width: 80,  type: 'number' },
 ]
 
-const features = {
-  sort:        true,
-  filterBar:   true,
-  group:       true,
+const features = computed(() => ({
+  sort:          true,
+  filterBar:     props.settings.filters,
+  group:         props.settings.grouping,
   excelExporter: true,
-  stripe:      true,
-}
+  stripe:        props.settings.striping,
+}))
 
 function getGrid() {
   return gridRef.value?.instance?.value

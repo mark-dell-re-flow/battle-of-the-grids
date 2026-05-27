@@ -113,3 +113,73 @@ body {
 .b-grid-wrapper .b-grid {
   height: 100%;
 }
+
+.settings-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-left: auto;
+}
+
+.setting-group {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.setting-label {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.btn-group {
+  display: flex;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.btn-group button,
+.toggle-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.6);
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background 0.15s, color 0.15s;
+}
+
+.toggle-btn {
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 4px;
+  min-width: 2.5rem;
+}
+
+.btn-group button + button {
+  border-left: 1px solid rgba(255,255,255,0.2);
+}
+
+.btn-group button:hover,
+.toggle-btn:hover {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}
+
+.btn-group button.active,
+.toggle-btn.active {
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  font-weight: 600;
+}
+
+.limitation {
+  font-size: 0.78rem;
+  color: #f59e0b;
+  background: rgba(245,158,11,0.12);
+  border: 1px solid rgba(245,158,11,0.3);
+  border-radius: 4px;
+  padding: 0.15rem 0.5rem;
+}

@@ -3,6 +3,8 @@
     <div class="toolbar">
       <button @click="exportCsv">⬇ CSV</button>
       <button @click="clearFilters">✕ Clear filters</button>
+      <span class="limitation" v-if="settings.grouping">⚠ Grouping: Enterprise only</span>
+      <span class="limitation" v-if="settings.scrollMode === 'paginate' && settings.grouping">·</span>
       <span class="sep" />
       <span class="row-count">{{ rowData.length.toLocaleString() }} rows</span>
     </div>
@@ -12,7 +14,7 @@
         :rowData="rowData"
         :columnDefs="columnDefs"
         :defaultColDef="defaultColDef"
-        :pagination="true"
+        :pagination="settings.scrollMode === 'paginate'"
         :paginationPageSize="100"
         :paginationPageSizeSelector="[50, 100, 500, 1000]"
         :animateRows="false"
@@ -23,13 +25,16 @@
 </template>
 
 <script setup>
-import { shallowRef } from 'vue'
+import { computed, shallowRef } from 'vue'
 import { AgGridVue } from 'ag-grid-vue3'
 import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community'
 
 ModuleRegistry.registerModules([AllCommunityModule])
 
-defineProps({ rowData: { type: Array, required: true } })
+const props = defineProps({
+  rowData:  { type: Array,  required: true },
+  settings: { type: Object, required: true },
+})
 
 const gridApi = shallowRef(null)
 
@@ -46,11 +51,11 @@ const columnDefs = [
   { field: 'age',             headerName: 'Age',         width: 80,  filter: 'agNumberColumnFilter' },
 ]
 
-const defaultColDef = {
-  sortable: true,
-  resizable: true,
-  floatingFilter: true,
-}
+const defaultColDef = computed(() => ({
+  sortable:      true,
+  resizable:     true,
+  floatingFilter: props.settings.filters,
+}))
 
 function onGridReady(params) {
   gridApi.value = params.api
