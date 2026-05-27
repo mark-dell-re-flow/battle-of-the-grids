@@ -1,88 +1,116 @@
-import { watch } from 'vue'
-import type { Ref } from 'vue'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore — Bryntum has no bundled type declarations
 import { AjaxHelper, AjaxStore, GridRowModel } from '@bryntum/grid'
-import type { User, Settings } from '../types'
+import { watch } from 'vue'
+import { useQueryClient, type QueryClient } from '@tanstack/vue-query'
+import type { Settings } from '../types'
+import { DUMMYJSON_SELECT, type RawUser, transformUser } from './useUsersQuery'
 
 export const PAGE_SIZE = 25
 
-// Register the mock URL once at module level so Hot Module Replacement
-// doesn't re-register it on every component remount.
-let mockRegistered = false
+// When virtual scroll is active we load everything in one request.
+// dummyjson has 208 users; 500 is safely above that.
+const VIRTUAL_LIMIT = 500
 
-function registerMock(getData: () => User[]): void {
+// Maps every canonical User field to the dummyjson sortBy path.
+// dummyjson supports dot-notation for nested fields (e.g. company.title).
+const SORT_FIELD_MAP: Record<string, string> = {
+  id:         'id',
+  name:       'firstName',           // no combined name field in dummyjson
+  age:        'age',
+  email:      'email',
+  role:       'role',
+  department: 'company.department',
+  title:      'company.title',
+  company:    'company.name',
+  country:    'address.country',
+  state:      'address.state',
+}
+
+let mockRegistered = false
+let queryClient: QueryClient | null = null
+
+type PageResponse = { responseText: string }
+
+async function fetchPage(params: Record<string, string>): Promise<PageResponse> {
+  const page     = parseInt(params['page']     ?? '1',              10)
+  const pageSize = parseInt(params['pageSize'] ?? String(PAGE_SIZE), 10)
+  const skip     = (page - 1) * pageSize
+
+  const urlParams = new URLSearchParams({
+    limit:  String(pageSize),
+    skip:   String(skip),
+    select: DUMMYJSON_SELECT,
+  })
+
+  let endpoint = 'https://dummyjson.com/users'
+
+  // Filter — dummyjson only supports global q= search, not per-field.
+  if (params['filter']) {
+    try {
+      const filters = JSON.parse(params['filter']) as Array<{ field: string; value: unknown }>
+      const term = filters.find(f => f.value !== '' && f.value != null)?.value
+      if (term) {
+        endpoint = 'https://dummyjson.com/users/search'
+        urlParams.set('q', String(term))
+      }
+    } catch { /* ignore malformed JSON */ }
+  }
+
+  // Sort — map our field names to dummyjson's sortBy/order params
+  if (params['sort']) {
+    try {
+      const [{ field, ascending = true }] = JSON.parse(params['sort']) as Array<{
+        field: string; ascending?: boolean
+      }>
+      const dummyField = SORT_FIELD_MAP[field]
+      if (dummyField) {
+        urlParams.set('sortBy', dummyField)
+        urlParams.set('order', ascending ? 'asc' : 'desc')
+      }
+    } catch { /* ignore malformed JSON */ }
+  }
+
+  const res = await fetch(`${endpoint}?${urlParams}`)
+  if (!res.ok) throw new Error(`dummyjson fetch failed: ${res.status}`)
+  const { users, total } = await res.json() as { users: RawUser[]; total: number }
+
+  return {
+    responseText: JSON.stringify({
+      success: true,
+      total,
+      data: users.map(transformUser),
+    }),
+  }
+}
+
+// Register the AjaxHelper mock once. Each unique combination of page/pageSize/
+// sort/filter gets its own TanStack Query cache entry — back-navigation and
+// repeated requests are served from cache without hitting the network.
+function registerMock(): void {
   if (mockRegistered) return
   mockRegistered = true
 
   AjaxHelper.mockUrl('/bryntum-data', (_url: string, params: Record<string, string>) => {
-    let rows = getData().slice()
-
-    // Filter
-    if (params['filter']) {
-      try {
-        const filters = JSON.parse(params['filter']) as Array<{
-          field: string; value: unknown; operator?: string
-        }>
-        for (const { field, value, operator = 'contains' } of filters) {
-          if (value === null || value === undefined || value === '') continue
-          rows = rows.filter(row => {
-            const cell = row[field as keyof User]
-            if (cell == null) return false
-            const s  = String(cell).toLowerCase()
-            const v  = String(value).toLowerCase()
-            switch (operator.toLowerCase()) {
-              case '=':  case 'eq':  return s === v
-              case '!=': case 'ne':  return s !== v
-              case '>':  case 'gt':  return Number(cell) > Number(value)
-              case '>=': case 'gte': return Number(cell) >= Number(value)
-              case '<':  case 'lt':  return Number(cell) < Number(value)
-              case '<=': case 'lte': return Number(cell) <= Number(value)
-              case 'startswith':     return s.startsWith(v)
-              case 'endswith':       return s.endsWith(v)
-              default:               return s.includes(v)
-            }
-          })
-        }
-      } catch { /* ignore malformed filter JSON */ }
-    }
-
-    // Sort
-    if (params['sort']) {
-      try {
-        const [{ field, ascending = true }] = JSON.parse(params['sort']) as Array<{
-          field: string; ascending?: boolean
-        }>
-        rows.sort((a, b) => {
-          const av = a[field as keyof User] ?? ''
-          const bv = b[field as keyof User] ?? ''
-          const cmp = av < bv ? -1 : av > bv ? 1 : 0
-          return ascending ? cmp : -cmp
-        })
-      } catch { /* ignore malformed sort JSON */ }
-    }
-
-    const page     = parseInt(params['page'] ?? '1', 10)
-    const pageSize = parseInt(params['pageSize'] ?? String(PAGE_SIZE), 10)
-    const start    = (page - 1) * pageSize
-
-    return {
-      responseText: JSON.stringify({
-        success: true,
-        total:   rows.length,
-        data:    rows.slice(start, start + pageSize),
-      }),
-    }
+    const qc = queryClient!
+    const { page, pageSize, sort = null, filter = null } = params
+    return qc.fetchQuery({
+      queryKey:  ['bryntum-page', { page, pageSize, sort, filter }],
+      queryFn:   () => fetchPage(params),
+      staleTime: 2 * 60 * 1000,
+    })
   })
 }
 
 /**
- * Creates an AjaxStore backed by local data via AjaxHelper.mockUrl.
- * Supports pagination, sort and filter transparently — the PagingToolbar
- * works as if talking to a real server.
+ * Creates an AjaxStore that fetches directly from dummyjson.com.
+ * Bryntum's pagination/sort/filter params are translated to dummyjson's API.
+ * Each unique request is cached via TanStack Query so repeated or back-navigation
+ * requests are served instantly from cache.
  */
-export function useBryntumStore(data: Ref<User[] | undefined>, getSettings: () => Settings) {
-  registerMock(() => data.value ?? [])
+export function useBryntumStore(getSettings: () => Settings) {
+  queryClient = useQueryClient()
+  registerMock()
 
   const store = new AjaxStore({
     modelClass:      GridRowModel,
@@ -95,16 +123,11 @@ export function useBryntumStore(data: Ref<User[] | undefined>, getSettings: () =
   })
 
   async function reload(): Promise<void> {
-    if (!data.value) return
-    store.pageSize = getSettings().scrollMode === 'paginate' ? PAGE_SIZE : data.value.length
+    store.pageSize = getSettings().scrollMode === 'paginate' ? PAGE_SIZE : VIRTUAL_LIMIT
     await store.loadPage(1, {})
   }
 
-  // Load once the TanStack Query data arrives
-  watch(data, reload, { immediate: true })
-
-  // Reload when the user switches scroll mode
-  watch(() => getSettings().scrollMode, reload)
+  watch(() => getSettings().scrollMode, reload, { immediate: true })
 
   return { store }
 }

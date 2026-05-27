@@ -19,10 +19,11 @@ Open http://localhost:5173 and switch between the two tabs.
 
 | Feature | AG Grid Community | AG Grid Enterprise | Bryntum Grid |
 |---|---|---|---|
-| Sorting (multi-column) | ✅ | ✅ | ✅ |
-| Filtering | ✅ Floating filters | ✅ | ✅ Filter bar |
+| Sorting (multi-column) | ✅ Client-side | ✅ Client or server-side | ✅ Client or server-side |
+| Filtering | ✅ Client-side floating filters | ✅ Client or server-side | ✅ Client or server-side |
 | Virtual scrolling | ✅ | ✅ | ✅ |
-| Pagination | ✅ | ✅ | ⚠️ AjaxStore only (see below) |
+| Pagination | ✅ Client-side | ✅ Client or server-side | ⚠️ Server-side (AjaxStore) only |
+| **Server-Side Row Model** | ❌ Enterprise only | ✅ | ✅ Native via AjaxStore |
 | Row grouping | ❌ Enterprise only | ✅ | ✅ |
 | Pivoting | ❌ Enterprise only | ✅ | ❌ |
 | Tree / hierarchical data | ❌ Enterprise only | ✅ | ✅ |

@@ -1,31 +1,54 @@
 import { useQuery } from '@tanstack/vue-query'
 import type { User } from '../types'
 
-const SELECT = 'id,firstName,lastName,age,email,role,company,address'
+// Fields we need from dummyjson — used by both this query and useBryntumStore
+export const DUMMYJSON_SELECT = 'id,firstName,lastName,age,email,role,company,address'
 
-async function fetchUsers(): Promise<User[]> {
-  const res = await fetch(`https://dummyjson.com/users?limit=0&select=${SELECT}`)
-  if (!res.ok) throw new Error(`dummyjson fetch failed: ${res.status}`)
-  const { users } = await res.json() as { users: Record<string, unknown>[] }
-
-  return users.map(u => ({
-    id:         u['id']         as number,
-    name:       `${u['firstName']} ${u['lastName']}`,
-    department: (u['company'] as Record<string, unknown>)?.['department'] as string ?? '',
-    title:      (u['company'] as Record<string, unknown>)?.['title']      as string ?? '',
-    company:    (u['company'] as Record<string, unknown>)?.['name']       as string ?? '',
-    role:       u['role']       as string ?? '',
-    country:    (u['address']  as Record<string, unknown>)?.['country']   as string ?? '',
-    state:      (u['address']  as Record<string, unknown>)?.['state']     as string ?? '',
-    age:        u['age']        as number,
-    email:      u['email']      as string ?? '',
-  }))
+// Raw shape returned by dummyjson before transformation
+export interface RawUser {
+  id:         number
+  firstName:  string
+  lastName:   string
+  age:        number
+  email:      string
+  role:       string
+  company:    { department: string; title: string; name: string }
+  address:    { country: string; state: string }
 }
 
+// Transform a raw dummyjson user into our canonical User shape.
+// Exported so useBryntumStore can reuse the same transform on server responses.
+export function transformUser(u: RawUser): User {
+  return {
+    id:         u.id,
+    name:       `${u.firstName} ${u.lastName}`,
+    department: u.company?.department ?? '',
+    title:      u.company?.title      ?? '',
+    company:    u.company?.name       ?? '',
+    role:       u.role                ?? '',
+    country:    u.address?.country    ?? '',
+    state:      u.address?.state      ?? '',
+    age:        u.age,
+    email:      u.email               ?? '',
+  }
+}
+
+async function fetchAllUsers(): Promise<RawUser[]> {
+  const res = await fetch(
+    `https://dummyjson.com/users?limit=0&select=${DUMMYJSON_SELECT}`
+  )
+  if (!res.ok) throw new Error(`dummyjson fetch failed: ${res.status}`)
+  const { users } = await res.json() as { users: RawUser[] }
+  return users
+}
+
+// Fetches all 208 users once; TanStack Query caches the raw response and
+// applies `select` to transform it. AG Grid uses this for client-side ops.
 export function useUsersQuery() {
-  return useQuery<User[]>({
+  return useQuery<RawUser[], Error, User[]>({
     queryKey:  ['users'],
-    queryFn:   fetchUsers,
+    queryFn:   fetchAllUsers,
+    select:    users => users.map(transformUser),
     staleTime: 5 * 60 * 1000,
   })
 }

@@ -1,10 +1,9 @@
 <template>
   <div class="grid-wrapper">
     <div class="toolbar">
-      <button @click="exportCsv">⬇ CSV</button>
-      <button class="btn-disabled" title="Excel export requires AG Grid Enterprise">⬇ Excel (Enterprise only)</button>
       <button @click="clearFilters">✕ Clear filters</button>
       <span class="limitation" v-if="settings.grouping">⚠ Grouping: Enterprise only</span>
+      <span class="limitation">⚠ Server-side sort/filter/page: Enterprise only</span>
       <span class="sep" />
       <span class="row-count" v-if="data">{{ data.length.toLocaleString() }} rows</span>
       <span class="row-count" v-else-if="isLoading">Loading…</span>
@@ -62,10 +61,6 @@ const stripeStyle = computed(() =>
 
 function onGridReady(params: { api: GridApi }): void {
   gridApi.value = params.api
-}
-
-function exportCsv(): void {
-  gridApi.value?.exportDataAsCsv({ fileName: 'ag-grid-export.csv' })
 }
 
 function clearFilters(): void {

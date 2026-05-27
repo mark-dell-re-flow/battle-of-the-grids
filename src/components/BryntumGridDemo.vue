@@ -1,9 +1,8 @@
 <template>
   <div class="grid-wrapper">
     <div class="toolbar">
-      <button @click="exportCsv">⬇ CSV</button>
-      <button @click="exportExcel">⬇ Excel</button>
       <button @click="clearFilters">✕ Clear filters</button>
+      <span class="server-badge">🌐 Sort/filter/page: server-side</span>
       <span class="sep" />
       <span class="row-count" v-if="data">{{ data.length.toLocaleString() }} rows</span>
       <span class="row-count" v-else-if="isLoading">Loading…</span>
@@ -19,7 +18,6 @@
         :filterBarFeature="true"
         :groupFeature="true"
         :stripeFeature="true"
-        :excelExporterFeature="true"
         :bbar="settings.scrollMode === 'paginate' ? { type: 'pagingtoolbar' } : null"
       />
     </div>
@@ -37,9 +35,11 @@ import type { Settings }         from '../types'
 
 const props = defineProps<{ settings: Settings }>()
 
+// useUsersQuery is still called here for loading/error/row-count display.
+// The store fetches independently from dummyjson server-side.
 const { data, isLoading, isError, error } = useUsersQuery()
 
-const { store } = useBryntumStore(data, () => props.settings)
+const { store } = useBryntumStore(() => props.settings)
 
 // Cast needed: Bryntum's GridColumnConfig type is overly narrow (type: 'widget' only)
 // Our columns are valid at runtime; the canonical type system can't express the full union.
@@ -53,18 +53,6 @@ function getGrid() {
 }
 
 useBryntumFeatures(getGrid, () => props.settings)
-
-function exportCsv(): void {
-  const grid = getGrid()
-  ;(grid?.['features'] as Record<string, { export: (cfg: object) => void }>)
-    ?.['excelExporter']?.export({ exporterType: 'csv',  fileName: 'bryntum-export.csv' })
-}
-
-function exportExcel(): void {
-  const grid = getGrid()
-  ;(grid?.['features'] as Record<string, { export: (cfg: object) => void }>)
-    ?.['excelExporter']?.export({ exporterType: 'xlsx', fileName: 'bryntum-export.xlsx' })
-}
 
 function clearFilters(): void {
   const grid = getGrid()

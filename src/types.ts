@@ -19,8 +19,10 @@ export interface Settings {
 }
 
 export interface CanonicalColumn {
-  field: keyof User
-  label: string
-  type:  'text' | 'number'
-  flex:  number
+  field:    keyof User
+  label:    string
+  type:     'text' | 'number'
+  flex:     number
+  /** false = dummyjson cannot sort this field server-side (nested path) */
+  sortable?: boolean
 }
