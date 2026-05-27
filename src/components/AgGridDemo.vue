@@ -25,7 +25,7 @@
 </template>
 
 <script setup>
-import { computed, shallowRef } from 'vue'
+import { computed, shallowRef, watch, nextTick } from 'vue'
 import { AgGridVue } from 'ag-grid-vue3'
 import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community'
 
@@ -38,7 +38,7 @@ const props = defineProps({
 
 const gridApi = shallowRef(null)
 
-const columnDefs = [
+const COLUMN_DEFS = [
   { field: 'id',              headerName: 'ID',          width: 80,  filter: 'agNumberColumnFilter' },
   { field: 'name',            headerName: 'Name',        width: 180, filter: 'agTextColumnFilter' },
   { field: 'department',      headerName: 'Department',  width: 140, filter: 'agTextColumnFilter' },
@@ -50,6 +50,13 @@ const columnDefs = [
   { field: 'yearsExperience', headerName: 'Exp (yrs)',   width: 110, filter: 'agNumberColumnFilter' },
   { field: 'age',             headerName: 'Age',         width: 80,  filter: 'agNumberColumnFilter' },
 ]
+
+// Strip explicit widths in fluid mode so flex:1 from defaultColDef takes effect
+const columnDefs = computed(() =>
+  props.settings.columnSizing === 'fluid'
+    ? COLUMN_DEFS.map(({ width, ...col }) => col)
+    : COLUMN_DEFS
+)
 
 const defaultColDef = computed(() => ({
   sortable:       true,
@@ -68,6 +75,11 @@ const stripeStyle = computed(() =>
 function onGridReady(params) {
   gridApi.value = params.api
 }
+
+// After switching to fluid, tell AG Grid to fill available width
+watch(() => props.settings.columnSizing, (val) => {
+  if (val === 'fluid') nextTick(() => gridApi.value?.sizeColumnsToFit())
+})
 
 function exportCsv() {
   gridApi.value?.exportDataAsCsv({ fileName: 'ag-grid-export.csv' })

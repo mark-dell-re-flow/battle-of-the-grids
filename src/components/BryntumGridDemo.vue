@@ -86,6 +86,24 @@ watch(
   () => nextTick(applyFeatureSettings),
 )
 
+// Bryntum :columns prop is not reactive after init — update column models imperatively
+watch(() => props.settings.columnSizing, (val) => {
+  const grid = getGrid()
+  if (!grid) return
+  nextTick(() => {
+    grid.columns.forEach(col => {
+      const original = COLUMNS.find(c => c.field === col.field)
+      if (val === 'fluid') {
+        col.flex = 1
+        col.width = null
+      } else {
+        col.flex = null
+        col.width = original?.width ?? 120
+      }
+    })
+  })
+})
+
 function exportCsv() {
   getGrid()?.features.excelExporter.export({ exporterType: 'csv', fileName: 'bryntum-export.csv' })
 }
