@@ -104,33 +104,6 @@ body {
   color: #888;
 }
 
-.ag-grid-wrapper, .b-grid-wrapper {
-  flex: 1;
-  min-height: 0;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-/* AG Grid fills its container */
-.ag-grid-wrapper [class^="ag-theme-"] {
-  height: 100%;
-  width: 100%;
-}
-
-/* AG Grid internally sets height:0 on ag-root-wrapper-body (ag-layout-normal) as
-   part of its own flex strategy. Combined with our flex-column layout this causes
-   filter popups to push row content out of view. Override to let flex handle it. */
-.ag-grid-wrapper .ag-root-wrapper-body.ag-layout-normal {
-  height: auto;
-  flex: 1 1 auto;
-}
-
-/* Bryntum fills its container */
-.b-grid-wrapper .b-grid {
-  height: 100%;
-}
-
 .settings-bar {
   display: flex;
   align-items: center;
