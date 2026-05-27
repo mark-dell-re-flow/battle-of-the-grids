@@ -15,9 +15,9 @@
         :data="rowData"
         :columns="columns"
         :sortFeature="'name'"
-        :filterBarFeature="settings.filters"
-        :groupFeature="settings.grouping"
-        :stripeFeature="settings.striping ? true : { disabled: true }"
+        :filterBarFeature="settings.filters ? { disabled: false } : { disabled: true }"
+        :groupFeature="settings.grouping ? { disabled: false } : { disabled: true }"
+        :stripeFeature="settings.striping ? { disabled: false } : { disabled: true }"
         :excelExporterFeature="true"
         :bbar="null"
       />
