@@ -108,10 +108,10 @@ const tabs = [
 const settings = reactive<Settings>({
   scrollMode:  'paginate',
   filters:     true,
-  grouping:    false,
+  grouping:    true,
   striping:    true,
-  selection:   false,
-  expandable:  false,
-  customCells: false,
+  selection:   true,
+  expandable:  true,
+  customCells: true,
 })
 </script>
