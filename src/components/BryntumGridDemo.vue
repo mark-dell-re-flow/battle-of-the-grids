@@ -26,7 +26,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { BryntumGrid } from '@bryntum/grid-vue-3'
 
 const props = defineProps({
@@ -36,7 +36,7 @@ const props = defineProps({
 
 const gridRef = ref(null)
 
-const columns = [
+const COLUMNS = [
   { field: 'id',              text: 'ID',          width: 80,  type: 'number' },
   { field: 'name',            text: 'Name',        width: 180 },
   { field: 'department',      text: 'Department',  width: 140 },
@@ -48,6 +48,12 @@ const columns = [
   { field: 'yearsExperience', text: 'Exp (yrs)',   width: 110, type: 'number' },
   { field: 'age',             text: 'Age',         width: 80,  type: 'number' },
 ]
+
+const columns = computed(() =>
+  props.settings.columnSizing === 'fixed'
+    ? COLUMNS
+    : COLUMNS.map(({ width, ...col }) => col)
+)
 
 function getGrid() {
   return gridRef.value?.instance?.value

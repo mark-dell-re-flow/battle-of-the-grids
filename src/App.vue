@@ -14,6 +14,20 @@
 
       <div class="settings-bar">
         <div class="setting-group">
+          <span class="setting-label">Columns</span>
+          <div class="btn-group">
+            <button
+              :class="{ active: settings.columnSizing === 'fluid' }"
+              @click="settings.columnSizing = 'fluid'"
+            >Fluid</button>
+            <button
+              :class="{ active: settings.columnSizing === 'fixed' }"
+              @click="settings.columnSizing = 'fixed'"
+            >Fixed</button>
+          </div>
+        </div>
+
+        <div class="setting-group">
           <span class="setting-label">Scroll</span>
           <div class="btn-group">
             <button
@@ -84,10 +98,11 @@ const tabs = [
 ]
 
 const settings = reactive({
-  scrollMode: 'paginate',
-  filters:    true,
-  grouping:   false,
-  striping:   true,
+  scrollMode:    'paginate',
+  filters:       true,
+  grouping:      false,
+  striping:      true,
+  columnSizing:  'fluid',
 })
 
 const rowData = shallowRef(generateEmployees(100_000))

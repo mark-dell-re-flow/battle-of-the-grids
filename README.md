@@ -22,7 +22,7 @@ Open http://localhost:5173 and switch between the two tabs.
 | Pagination | ✅ Built-in | ⚠️ PagingToolbar is server-side only; not usable with local data |
 | CSV export | ✅ Community | ✅ ExcelExporter feature |
 | Excel export | ❌ Enterprise only | ✅ Built-in (trial) |
-| Dark mode (`prefers-color-scheme`) | ✅ `ag-theme-quartz-auto-dark` | ⚠️ No built-in support — themed CSS files are static; would need manual JS to swap stylesheets at runtime |
+| Column sizing default | Fixed pixel widths — container sized to sum of columns; horizontal scroll by default. Fluid layout requires `sizeColumnsToFit()`, `flex` on col defs, or `autoSizeStrategy` | Fluid — columns stretch to fill available width by default unless `width` is explicitly set |
 
 ## Known limitations found during setup
 
