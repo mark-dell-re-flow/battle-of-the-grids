@@ -20,8 +20,8 @@ export function useBryntumFeatures(
     const settings = getSettings()
     const features = grid['features'] as Record<string, { show?: () => void; hide?: () => void; disabled?: boolean }>
 
-    const fb = features['filterBar']
-    if (fb) settings.filters ? fb.show?.() : fb.hide?.()
+    const fb = features['filterBar'] as { showFilterBar?: () => void; hideFilterBar?: () => void } | undefined
+    if (fb) settings.filters ? fb.showFilterBar?.() : fb.hideFilterBar?.()
 
     const grp = features['group']
     if (grp) {
