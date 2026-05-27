@@ -1,18 +1,22 @@
 // ── Variables ────────────────────────────────────────────────────────────────
-$header-bg:      #1a1a2e;
-$header-height:  52px;
-$surface:        #fff;
-$surface-muted:  #fafafa;
-$border:         #e5e5e5;
-$text-muted:     #888;
-$header-ghost:   rgba(255, 255, 255, 0.2);
+$header-bg: #1a1a2e;
+$header-height: 52px;
+$surface: #fff;
+$surface-muted: #fafafa;
+$border: #e5e5e5;
+$text-muted: #888;
+$header-ghost: rgba(255, 255, 255, 0.2);
 
-$green:  #10b981;
-$red:    #ef4444;
-$amber:  #f59e0b;
+$green: #10b981;
+$red: #ef4444;
+$amber: #f59e0b;
 
 // ── Reset ────────────────────────────────────────────────────────────────────
-*, *::before, *::after { box-sizing: border-box; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 
 body {
   margin: 0;
@@ -63,8 +67,16 @@ body {
     font-size: 0.9rem;
     transition: background 0.15s, color 0.15s;
 
-    &:hover  { background: rgba(255, 255, 255, 0.1);  color: $surface; }
-    &.active { background: rgba(255, 255, 255, 0.18); color: $surface; font-weight: 600; }
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: $surface;
+    }
+
+    &.active {
+      background: rgba(255, 255, 255, 0.18);
+      color: $surface;
+      font-weight: 600;
+    }
   }
 }
 
@@ -107,7 +119,9 @@ body {
     cursor: pointer;
     font-size: 0.82rem;
 
-    &:hover { background: #f0f0f0; }
+    &:hover {
+      background: #f0f0f0;
+    }
   }
 
   .btn-disabled {
@@ -116,7 +130,9 @@ body {
     pointer-events: none;
   }
 
-  .sep { flex: 1; }
+  .sep {
+    flex: 1;
+  }
 }
 
 .row-count {
@@ -143,7 +159,10 @@ body {
   white-space: nowrap;
   transition: background 0.15s, color 0.15s;
 
-  &:hover { background: #f0f0f0; color: #222; }
+  &:hover {
+    background: #f0f0f0;
+    color: #222;
+  }
 }
 
 // ── Settings bar (in header) ─────────────────────────────────────────────────
@@ -177,8 +196,16 @@ body {
   font-size: 0.8rem;
   transition: background 0.15s, color 0.15s;
 
-  &:hover  { background: rgba(255, 255, 255, 0.1); color: $surface; }
-  &.active { background: $header-ghost; color: $surface; font-weight: 600; }
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: $surface;
+  }
+
+  &.active {
+    background: $header-ghost;
+    color: $surface;
+    font-weight: 600;
+  }
 }
 
 .btn-group {
@@ -190,7 +217,9 @@ body {
   button {
     @extend %header-btn;
 
-    & + button { border-left: 1px solid $header-ghost; }
+    &+button {
+      border-left: 1px solid $header-ghost;
+    }
   }
 }
 
@@ -200,27 +229,3 @@ body {
   border-radius: 4px;
   min-width: 2.5rem;
 }
-
-// ── Feature footer ───────────────────────────────────────────────────────────
-.feature-footer {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem 0.6rem;
-  padding: 0.5rem 1rem;
-  background: #f8f8f8;
-  border-top: 1px solid #e0e0e0;
-  font-size: 0.78rem;
-}
-
-.feat {
-  padding: 0.15rem 0.5rem;
-  border-radius: 4px;
-  white-space: nowrap;
-
-  em { font-style: normal; opacity: 0.7; }
-
-  &-yes  { background: rgba($green, 0.1);  border: 1px solid rgba($green, 0.3); }
-  &-no   { background: rgba($red,   0.08); border: 1px solid rgba($red,   0.25); }
-  &-warn { background: rgba($amber, 0.1);  border: 1px solid rgba($amber, 0.3); }
-}
-
