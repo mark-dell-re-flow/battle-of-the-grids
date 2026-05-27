@@ -1,0 +1,226 @@
+// ── Variables ────────────────────────────────────────────────────────────────
+$header-bg:      #1a1a2e;
+$header-height:  52px;
+$surface:        #fff;
+$surface-muted:  #fafafa;
+$border:         #e5e5e5;
+$text-muted:     #888;
+$header-ghost:   rgba(255, 255, 255, 0.2);
+
+$green:  #10b981;
+$red:    #ef4444;
+$amber:  #f59e0b;
+
+// ── Reset ────────────────────────────────────────────────────────────────────
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #f5f5f5;
+  color: #222;
+}
+
+// ── App shell ────────────────────────────────────────────────────────────────
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+// ── Header ───────────────────────────────────────────────────────────────────
+.app-header {
+  background: $header-bg;
+  color: $surface;
+  padding: 0 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  height: $header-height;
+  flex-shrink: 0;
+
+  h1 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+}
+
+// ── Tabs ─────────────────────────────────────────────────────────────────────
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+
+  button {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.65);
+    padding: 0.4rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.15s, color 0.15s;
+
+    &:hover  { background: rgba(255, 255, 255, 0.1);  color: $surface; }
+    &.active { background: rgba(255, 255, 255, 0.18); color: $surface; font-weight: 600; }
+  }
+}
+
+// ── Tab content ──────────────────────────────────────────────────────────────
+.tab-content {
+  flex: 1;
+  min-height: 0;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+}
+
+// ── Grid card (shared wrapper used by both grid components) ──────────────────
+.grid-wrapper {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: $surface;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+// ── Toolbar (inside each grid card) ─────────────────────────────────────────
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid $border;
+  background: $surface-muted;
+  flex-shrink: 0;
+
+  button {
+    padding: 0.3rem 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: $surface;
+    cursor: pointer;
+    font-size: 0.82rem;
+
+    &:hover { background: #f0f0f0; }
+  }
+
+  .btn-disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  .sep { flex: 1; }
+}
+
+.row-count {
+  font-size: 0.82rem;
+  color: $text-muted;
+}
+
+.limitation {
+  font-size: 0.78rem;
+  color: $amber;
+  background: rgba($amber, 0.12);
+  border: 1px solid rgba($amber, 0.3);
+  border-radius: 4px;
+  padding: 0.15rem 0.5rem;
+}
+
+.docs-link {
+  font-size: 0.82rem;
+  color: #555;
+  text-decoration: none;
+  padding: 0.3rem 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover { background: #f0f0f0; color: #222; }
+}
+
+// ── Settings bar (in header) ─────────────────────────────────────────────────
+.settings-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-left: auto;
+}
+
+.setting-group {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.setting-label {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+// Shared styles for btn-group buttons and standalone toggle buttons
+%header-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover  { background: rgba(255, 255, 255, 0.1); color: $surface; }
+  &.active { background: $header-ghost; color: $surface; font-weight: 600; }
+}
+
+.btn-group {
+  display: flex;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid $header-ghost;
+
+  button {
+    @extend %header-btn;
+
+    & + button { border-left: 1px solid $header-ghost; }
+  }
+}
+
+.toggle-btn {
+  @extend %header-btn;
+  border: 1px solid $header-ghost;
+  border-radius: 4px;
+  min-width: 2.5rem;
+}
+
+// ── Feature footer ───────────────────────────────────────────────────────────
+.feature-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.6rem;
+  padding: 0.5rem 1rem;
+  background: #f8f8f8;
+  border-top: 1px solid #e0e0e0;
+  font-size: 0.78rem;
+}
+
+.feat {
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  white-space: nowrap;
+
+  em { font-style: normal; opacity: 0.7; }
+
+  &-yes  { background: rgba($green, 0.1);  border: 1px solid rgba($green, 0.3); }
+  &-no   { background: rgba($red,   0.08); border: 1px solid rgba($red,   0.25); }
+  &-warn { background: rgba($amber, 0.1);  border: 1px solid rgba($amber, 0.3); }
+}
+

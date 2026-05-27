@@ -1,6 +1,6 @@
 import { createApp } from 'vue'
 import { VueQueryPlugin } from '@tanstack/vue-query'
-import './style.css'
+import './style.scss'
 import '@bryntum/grid/grid.css'
 import App from './App.vue'
 

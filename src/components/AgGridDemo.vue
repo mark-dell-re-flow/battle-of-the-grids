@@ -73,26 +73,25 @@ function clearFilters(): void {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .ag-grid-wrapper {
   flex: 1;
   min-height: 0;
   width: 100%;
   display: flex;
   flex-direction: column;
-}
 
-/* Make the AG theme element fill the wrapper */
-.ag-grid-wrapper :deep([class^="ag-theme-"]) {
-  height: 100%;
-  width: 100%;
-}
+  :deep([class^="ag-theme-"]) {
+    height: 100%;
+    width: 100%;
+  }
 
-/* AG Grid sets height:0 on ag-root-wrapper-body (ag-layout-normal) internally.
-   Combined with our flex-column layout this causes filter popups to push row
-   content out of view. Override so our flex handles the sizing instead. */
-.ag-grid-wrapper :deep(.ag-root-wrapper-body.ag-layout-normal) {
-  height: auto;
-  flex: 1 1 auto;
+  // AG Grid sets height:0 on ag-root-wrapper-body (ag-layout-normal) internally.
+  // Combined with our flex-column layout this causes filter popups to push row
+  // content out of view. Override so our flex handles the sizing instead.
+  :deep(.ag-root-wrapper-body.ag-layout-normal) {
+    height: auto;
+    flex: 1 1 auto;
+  }
 }
 </style>
