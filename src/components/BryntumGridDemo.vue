@@ -14,7 +14,6 @@
         :columns="columns"
         :features="features"
         :sortFeature="'name'"
-        :tbar="tbarConfig"
       />
     </div>
   </div>
@@ -47,15 +46,6 @@ const features = {
   group:       true,
   excelExporter: true,
   stripe:      true,
-}
-
-// Bryntum's built-in paging toolbar
-const tbarConfig = {
-  items: {
-    pagingToolbar: {
-      type: 'pagingtoolbar',
-    }
-  }
 }
 
 function getGrid() {

@@ -19,7 +19,7 @@ Open http://localhost:5173 and switch between the two tabs.
 | Filtering | ✅ Floating filters per column | ✅ Filter bar |
 | Row grouping | ❌ Enterprise only | ✅ Right-click / group feature |
 | Virtualisation | ✅ (built-in) | ✅ (built-in) |
-| Pagination | ✅ Built-in | ✅ Paging toolbar |
+| Pagination | ✅ Built-in | ⚠️ PagingToolbar is server-side only; not usable with local data |
 | CSV export | ✅ Community | ✅ ExcelExporter feature |
 | Excel export | ❌ Enterprise only | ✅ Built-in (trial) |
 | Dark mode (`prefers-color-scheme`) | ✅ `ag-theme-quartz-auto-dark` | ⚠️ No built-in support — themed CSS files are static; would need manual JS to swap stylesheets at runtime |
@@ -31,7 +31,8 @@ Open http://localhost:5173 and switch between the two tabs.
 - **Excel export** — `.xlsx` export is Enterprise-only. Community supports CSV only.
 
 ### Bryntum Grid (Trial)
-- **Dark mode** — None of the themed CSS files (`stockholm-light.css`, `stockholm-dark.css`, etc.) include a `prefers-color-scheme` media query. The default `grid.css` is also static. Matching OS dark/light mode requires manually swapping stylesheets via JavaScript at runtime.
+- **Dark mode** — all themed CSS files (`stockholm-light.css`, `stockholm-dark.css`, etc.) are static; no `prefers-color-scheme` support built in. Would need JS-driven stylesheet swapping to match OS theme.
+- **Pagination with local data** — `PagingToolbar` is designed for server-side (remote) stores. Passing local data via the `data` prop shows "No records to display". Bryntum relies on virtual scrolling for large local datasets instead.
 
 ## Dataset
 
