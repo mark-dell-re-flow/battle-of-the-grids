@@ -17,7 +17,7 @@
         :sortFeature="'name'"
         :filterBarFeature="settings.filters"
         :groupFeature="settings.grouping"
-        :stripeFeature="settings.striping"
+        :stripeFeature="settings.striping ? true : { disabled: true }"
         :excelExporterFeature="true"
         :bbar="null"
       />

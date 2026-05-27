@@ -8,7 +8,7 @@
       <span class="row-count">{{ rowData.length.toLocaleString() }} rows</span>
       <a class="docs-link" href="https://www.ag-grid.com/vue-data-grid/" target="_blank" rel="noopener">📖 Docs ↗</a>
     </div>
-    <div class="ag-grid-wrapper" :class="{ 'ag-striped': settings.striping }">
+    <div class="ag-grid-wrapper" :style="stripeStyle">
       <AgGridVue
         class="ag-theme-quartz-auto-dark"
         :rowData="rowData"
@@ -58,6 +58,13 @@ const defaultColDef = computed(() => ({
   ...(props.settings.columnSizing === 'fluid' ? { flex: 1 } : {}),
 }))
 
+// AG Grid uses --ag-odd-row-background-color for striping
+const stripeStyle = computed(() =>
+  props.settings.striping
+    ? { '--ag-odd-row-background-color': 'rgba(0,0,0,0.06)' }
+    : { '--ag-odd-row-background-color': 'transparent' }
+)
+
 function onGridReady(params) {
   gridApi.value = params.api
 }
@@ -70,15 +77,3 @@ function clearFilters() {
   gridApi.value?.setFilterModel(null)
 }
 </script>
-
-<style>
-/* Striping via ag-row-odd — scoped to the .ag-striped wrapper */
-.ag-striped .ag-theme-quartz-auto-dark .ag-row-odd {
-  background-color: rgba(0, 0, 0, 0.04);
-}
-@media (prefers-color-scheme: dark) {
-  .ag-striped .ag-theme-quartz-auto-dark .ag-row-odd {
-    background-color: rgba(255, 255, 255, 0.04);
-  }
-}
-</style>
