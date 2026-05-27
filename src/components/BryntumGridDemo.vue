@@ -72,3 +72,18 @@ function clearFilters(): void {
   store.clearFilters?.()
 }
 </script>
+
+<style scoped>
+.b-grid-wrapper {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Make the Bryntum grid fill the wrapper */
+.b-grid-wrapper :deep(.b-grid) {
+  height: 100%;
+}
+</style>
