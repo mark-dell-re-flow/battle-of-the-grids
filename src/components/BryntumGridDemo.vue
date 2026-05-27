@@ -37,16 +37,16 @@ const props = defineProps({
 const gridRef = ref(null)
 
 const COLUMNS = [
-  { field: 'id',              text: 'ID',          type: 'number' },
-  { field: 'name',            text: 'Name' },
-  { field: 'department',      text: 'Department' },
-  { field: 'country',         text: 'Country' },
-  { field: 'salary',          text: 'Salary',      type: 'number', renderer: ({ value }) => value != null ? `$${value.toLocaleString()}` : '' },
-  { field: 'startDate',       text: 'Start Date' },
-  { field: 'performance',     text: 'Performance' },
-  { field: 'status',          text: 'Status' },
-  { field: 'yearsExperience', text: 'Exp (yrs)',   type: 'number' },
-  { field: 'age',             text: 'Age',         type: 'number' },
+  { field: 'id',              text: 'ID',          type: 'number', flex: 1 },
+  { field: 'name',            text: 'Name',                        flex: 2 },
+  { field: 'department',      text: 'Department',                  flex: 2 },
+  { field: 'country',         text: 'Country',                     flex: 2 },
+  { field: 'salary',          text: 'Salary',      type: 'number', flex: 1, renderer: ({ value }) => value != null ? `$${value.toLocaleString()}` : '' },
+  { field: 'startDate',       text: 'Start Date',                  flex: 1 },
+  { field: 'performance',     text: 'Performance',                 flex: 2 },
+  { field: 'status',          text: 'Status',                      flex: 1 },
+  { field: 'yearsExperience', text: 'Exp (yrs)',   type: 'number', flex: 1 },
+  { field: 'age',             text: 'Age',         type: 'number', flex: 1 },
 ]
 
 const columns = COLUMNS
