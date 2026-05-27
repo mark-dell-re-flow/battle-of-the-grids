@@ -59,23 +59,21 @@
     <main class="tab-content">
       <AgGridDemo
         v-if="activeTab === 'ag'"
-        :rowData="rowData"
         :settings="settings"
       />
       <BryntumGridDemo
         v-else-if="activeTab === 'bryntum'"
-        :rowData="rowData"
         :settings="settings"
       />
     </main>
   </div>
 </template>
 
-<script setup>
-import { ref, shallowRef, reactive } from 'vue'
+<script setup lang="ts">
+import { ref, reactive } from 'vue'
 import AgGridDemo from './components/AgGridDemo.vue'
 import BryntumGridDemo from './components/BryntumGridDemo.vue'
-import { generateEmployees } from './data/generateData.js'
+import type { Settings } from './types'
 
 const activeTab = ref('ag')
 const tabs = [
@@ -83,12 +81,10 @@ const tabs = [
   { id: 'bryntum', label: 'Bryntum Grid' },
 ]
 
-const settings = reactive({
-  scrollMode:    'paginate',
-  filters:       true,
-  grouping:      false,
-  striping:      true,
+const settings = reactive<Settings>({
+  scrollMode: 'paginate',
+  filters:    true,
+  grouping:   false,
+  striping:   true,
 })
-
-const rowData = shallowRef(generateEmployees(100_000))
 </script>

@@ -5,18 +5,21 @@
       <button @click="clearFilters">✕ Clear filters</button>
       <span class="limitation" v-if="settings.grouping">⚠ Grouping: Enterprise only</span>
       <span class="sep" />
-      <span class="row-count">{{ rowData.length.toLocaleString() }} rows</span>
+      <span class="row-count" v-if="data">{{ data.length.toLocaleString() }} rows</span>
+      <span class="row-count" v-else-if="isLoading">Loading…</span>
+      <span class="row-count error" v-else-if="isError">{{ error?.message }}</span>
       <a class="docs-link" href="https://www.ag-grid.com/vue-data-grid/" target="_blank" rel="noopener">📖 Docs ↗</a>
     </div>
     <div class="ag-grid-wrapper" :style="stripeStyle">
       <AgGridVue
         class="ag-theme-quartz-auto-dark"
-        :rowData="rowData"
+        :rowData="data ?? []"
         :columnDefs="columnDefs"
         :defaultColDef="defaultColDef"
+        :loading="isLoading"
         :pagination="settings.scrollMode === 'paginate'"
-        :paginationPageSize="100"
-        :paginationPageSizeSelector="[50, 100, 500, 1000]"
+        :paginationPageSize="PAGE_SIZE"
+        :paginationPageSizeSelector="[25, 50, 100]"
         :animateRows="false"
         @grid-ready="onGridReady"
       />
@@ -24,32 +27,23 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, shallowRef } from 'vue'
 import { AgGridVue } from 'ag-grid-vue3'
-import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community'
+import { ModuleRegistry, AllCommunityModule, type GridApi } from 'ag-grid-community'
+import { useUsersQuery }   from '../composables/useUsersQuery'
+import { COLUMNS, toAgColumnDefs } from '../composables/useColumnDefs'
+import type { Settings } from '../types'
 
 ModuleRegistry.registerModules([AllCommunityModule])
 
-const props = defineProps({
-  rowData:  { type: Array,  required: true },
-  settings: { type: Object, required: true },
-})
+const props = defineProps<{ settings: Settings }>()
 
-const gridApi = shallowRef(null)
+const { data, isLoading, isError, error } = useUsersQuery()
 
-const columnDefs = [
-  { field: 'id',              headerName: 'ID',          filter: 'agNumberColumnFilter' },
-  { field: 'name',            headerName: 'Name',        filter: 'agTextColumnFilter' },
-  { field: 'department',      headerName: 'Department',  filter: 'agTextColumnFilter' },
-  { field: 'country',         headerName: 'Country',     filter: 'agTextColumnFilter' },
-  { field: 'salary',          headerName: 'Salary',      filter: 'agNumberColumnFilter', valueFormatter: p => p.value != null ? `$${p.value.toLocaleString()}` : '' },
-  { field: 'startDate',       headerName: 'Start Date',  filter: 'agDateColumnFilter' },
-  { field: 'performance',     headerName: 'Performance', filter: 'agTextColumnFilter' },
-  { field: 'status',          headerName: 'Status',      filter: 'agTextColumnFilter' },
-  { field: 'yearsExperience', headerName: 'Exp (yrs)',   filter: 'agNumberColumnFilter' },
-  { field: 'age',             headerName: 'Age',         filter: 'agNumberColumnFilter' },
-]
+const PAGE_SIZE = 25
+const columnDefs   = toAgColumnDefs(COLUMNS)
+const gridApi      = shallowRef<GridApi | null>(null)
 
 const defaultColDef = computed(() => ({
   sortable:       true,
@@ -58,22 +52,21 @@ const defaultColDef = computed(() => ({
   floatingFilter: props.settings.filters,
 }))
 
-// AG Grid uses --ag-odd-row-background-color for striping
 const stripeStyle = computed(() =>
   props.settings.striping
     ? { '--ag-odd-row-background-color': 'rgba(0,0,0,0.06)' }
     : { '--ag-odd-row-background-color': 'transparent' }
 )
 
-function onGridReady(params) {
+function onGridReady(params: { api: GridApi }): void {
   gridApi.value = params.api
 }
 
-function exportCsv() {
+function exportCsv(): void {
   gridApi.value?.exportDataAsCsv({ fileName: 'ag-grid-export.csv' })
 }
 
-function clearFilters() {
+function clearFilters(): void {
   gridApi.value?.setFilterModel(null)
 }
 </script>
