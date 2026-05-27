@@ -11,16 +11,6 @@ npm run dev
 
 Open http://localhost:5173 and switch between the two tabs.
 
-## Background — Bryntum & AG Grid partnership
-
-In **November 2025**, Bryntum and AG Grid [announced a strategic partnership](https://bryntum.com/blog/bryntum-and-ag-grid-join-forces/) backed by Adelis Equity Partners. Both companies remain independent with their own product lines and licensing models, but with **aligned roadmaps and closer collaboration**.
-
-The combined suite now covers:
-- **AG Grid** — high-performance data grid + AG Charts
-- **Bryntum** — Scheduler, Gantt, Calendar, Scheduler Pro, Task Board, and Grid
-
-This makes the choice less about vendor risk and more about which API and feature set is the best fit for your use case.
-
 ---
 
 ## Feature comparison

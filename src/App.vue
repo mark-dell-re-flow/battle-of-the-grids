@@ -12,7 +12,7 @@
         >{{ tab.label }}</button>
       </nav>
 
-      <div class="settings-bar">
+      <div class="settings-bar" v-if="activeTab !== 'readme'">
         <div class="setting-group">
           <span class="setting-label">Scroll</span>
           <div class="btn-group">
@@ -57,17 +57,12 @@
     </header>
 
     <main class="tab-content">
-      <AgGridDemo
-        v-if="activeTab === 'ag'"
-        :settings="settings"
-      />
-      <BryntumGridDemo
-        v-else-if="activeTab === 'bryntum'"
-        :settings="settings"
-      />
+      <AgGridDemo      v-if="activeTab === 'ag'"      :settings="settings" />
+      <BryntumGridDemo v-else-if="activeTab === 'bryntum'" :settings="settings" />
+      <ReadmeViewer    v-else-if="activeTab === 'readme'" />
     </main>
 
-    <footer class="feature-footer">
+    <footer class="feature-footer" v-if="activeTab !== 'readme'">
       <template v-if="activeTab === 'ag'">
         <span class="feat feat-yes">✅ CSV export</span>
         <span class="feat feat-no">❌ Excel export <em>(Enterprise)</em></span>
@@ -96,12 +91,14 @@
 import { ref, reactive } from 'vue'
 import AgGridDemo from './components/AgGridDemo.vue'
 import BryntumGridDemo from './components/BryntumGridDemo.vue'
+import ReadmeViewer from './components/ReadmeViewer.vue'
 import type { Settings } from './types'
 
 const activeTab = ref('ag')
 const tabs = [
   { id: 'ag',      label: 'AG Grid' },
   { id: 'bryntum', label: 'Bryntum Grid' },
+  { id: 'readme',  label: '📖 README' },
 ]
 
 const settings = reactive<Settings>({
