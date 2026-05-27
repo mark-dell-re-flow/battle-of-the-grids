@@ -118,6 +118,14 @@ body {
   width: 100%;
 }
 
+/* AG Grid internally sets height:0 on ag-root-wrapper-body (ag-layout-normal) as
+   part of its own flex strategy. Combined with our flex-column layout this causes
+   filter popups to push row content out of view. Override to let flex handle it. */
+.ag-grid-wrapper .ag-root-wrapper-body.ag-layout-normal {
+  height: auto;
+  flex: 1 1 auto;
+}
+
 /* Bryntum fills its container */
 .b-grid-wrapper .b-grid {
   height: 100%;
