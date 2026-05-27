@@ -25,7 +25,7 @@
 </template>
 
 <script setup>
-import { computed, shallowRef, watch, nextTick } from 'vue'
+import { computed, shallowRef } from 'vue'
 import { AgGridVue } from 'ag-grid-vue3'
 import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community'
 
@@ -38,31 +38,24 @@ const props = defineProps({
 
 const gridApi = shallowRef(null)
 
-const COLUMN_DEFS = [
-  { field: 'id',              headerName: 'ID',          width: 80,  filter: 'agNumberColumnFilter' },
-  { field: 'name',            headerName: 'Name',        width: 180, filter: 'agTextColumnFilter' },
-  { field: 'department',      headerName: 'Department',  width: 140, filter: 'agTextColumnFilter' },
-  { field: 'country',         headerName: 'Country',     width: 160, filter: 'agTextColumnFilter' },
-  { field: 'salary',          headerName: 'Salary',      width: 130, filter: 'agNumberColumnFilter', valueFormatter: p => p.value != null ? `$${p.value.toLocaleString()}` : '' },
-  { field: 'startDate',       headerName: 'Start Date',  width: 130, filter: 'agDateColumnFilter' },
-  { field: 'performance',     headerName: 'Performance', width: 180, filter: 'agTextColumnFilter' },
-  { field: 'status',          headerName: 'Status',      width: 120, filter: 'agTextColumnFilter' },
-  { field: 'yearsExperience', headerName: 'Exp (yrs)',   width: 110, filter: 'agNumberColumnFilter' },
-  { field: 'age',             headerName: 'Age',         width: 80,  filter: 'agNumberColumnFilter' },
+const columnDefs = [
+  { field: 'id',              headerName: 'ID',          filter: 'agNumberColumnFilter' },
+  { field: 'name',            headerName: 'Name',        filter: 'agTextColumnFilter' },
+  { field: 'department',      headerName: 'Department',  filter: 'agTextColumnFilter' },
+  { field: 'country',         headerName: 'Country',     filter: 'agTextColumnFilter' },
+  { field: 'salary',          headerName: 'Salary',      filter: 'agNumberColumnFilter', valueFormatter: p => p.value != null ? `$${p.value.toLocaleString()}` : '' },
+  { field: 'startDate',       headerName: 'Start Date',  filter: 'agDateColumnFilter' },
+  { field: 'performance',     headerName: 'Performance', filter: 'agTextColumnFilter' },
+  { field: 'status',          headerName: 'Status',      filter: 'agTextColumnFilter' },
+  { field: 'yearsExperience', headerName: 'Exp (yrs)',   filter: 'agNumberColumnFilter' },
+  { field: 'age',             headerName: 'Age',         filter: 'agNumberColumnFilter' },
 ]
-
-// Strip explicit widths in fluid mode so flex:1 from defaultColDef takes effect
-const columnDefs = computed(() =>
-  props.settings.columnSizing === 'fluid'
-    ? COLUMN_DEFS.map(({ width, ...col }) => col)
-    : COLUMN_DEFS
-)
 
 const defaultColDef = computed(() => ({
   sortable:       true,
   resizable:      true,
+  flex:           1,
   floatingFilter: props.settings.filters,
-  ...(props.settings.columnSizing === 'fluid' ? { flex: 1 } : {}),
 }))
 
 // AG Grid uses --ag-odd-row-background-color for striping
@@ -75,11 +68,6 @@ const stripeStyle = computed(() =>
 function onGridReady(params) {
   gridApi.value = params.api
 }
-
-// After switching to fluid, tell AG Grid to fill available width
-watch(() => props.settings.columnSizing, (val) => {
-  if (val === 'fluid') nextTick(() => gridApi.value?.sizeColumnsToFit())
-})
 
 function exportCsv() {
   gridApi.value?.exportDataAsCsv({ fileName: 'ag-grid-export.csv' })
